@@ -13,12 +13,20 @@ export class DocumentComparerService {
     titleA: string = 'Document A (Original)',
     titleB: string = 'Document B (Revised / Counter)'
   ): Promise<DocumentComparisonResult> {
-    const analysisA = await documentAnalyzer.analyzeDocument(docA, titleA);
-    const analysisB = await documentAnalyzer.analyzeDocument(docB, titleB);
+    const analysisA = documentAnalyzer.generateDomainFallbackAnalysis(docA, titleA);
+    const analysisB = documentAnalyzer.generateDomainFallbackAnalysis(docB, titleB);
+
+    // Identify mutual categories vs omitted categories
+    const categoriesA = new Set(analysisA.clauses.map(c => c.category));
+    const categoriesB = new Set(analysisB.clauses.map(c => c.category));
+
+    const onlyInA = analysisA.clauses.filter(cA => !categoriesB.has(cA.category));
+    const onlyInB = analysisB.clauses.filter(cB => !categoriesA.has(cB.category));
 
     const systemPrompt = `You are LegalLens Comparison Engine, an expert at contract diffing, redline analysis, and identifying covert risk shifts in counter-proposals.
 Compare Document A against Document B.
-Assess which party the revisions favor, detail clause-by-clause changes, flag omitted protective clauses, and generate practical negotiation recommendations.
+Only compare clauses that exist in both documents.
+Assess which party the revisions favor, detail clause-by-clause changes, and generate practical negotiation recommendations.
 
 Return JSON strictly matching this shape:
 {
@@ -54,12 +62,10 @@ Return JSON strictly matching this shape:
       () => this.generateDomainFallbackComparison(analysisA.clauses, analysisB.clauses, titleA, titleB)
     );
 
-    // Compute clauses only in A and only in B based on matched clause pairings
-    const matchedTextA = new Set((result.matchedClauses || []).map(m => m.textA));
-    const matchedTextB = new Set((result.matchedClauses || []).map(m => m.textB));
-
-    const onlyInA = analysisA.clauses.filter(c => !matchedTextA.has(c.originalText));
-    const onlyInB = analysisB.clauses.filter(c => !matchedTextB.has(c.originalText));
+    // Ensure matched clauses only contain genuine pairs
+    const filteredMatched = (result.matchedClauses && result.matchedClauses.length > 0)
+      ? result.matchedClauses.filter(m => m.textA && m.textB && m.textA.trim() !== '' && m.textB.trim() !== '')
+      : this.generateDomainFallbackComparison(analysisA.clauses, analysisB.clauses, titleA, titleB).matchedClauses;
 
     return {
       titleA: result.titleA || titleA,
@@ -68,7 +74,7 @@ Return JSON strictly matching this shape:
       favorability: result.favorability,
       favorabilityExplanation: result.favorabilityExplanation,
       keyDifferences: result.keyDifferences || [],
-      matchedClauses: result.matchedClauses || [],
+      matchedClauses: filteredMatched,
       onlyInA,
       onlyInB,
       recommendations: result.recommendations || [],

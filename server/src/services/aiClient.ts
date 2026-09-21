@@ -11,8 +11,6 @@ class AIClientService {
     this.fallbackModels = [
       this.primaryModel,
       'liquid/lfm-2.5-2.6b:free',
-      'nvidia/nemotron-3.5-lightning:free',
-      'z-ai/glm-5.2:free',
     ];
     this.initClient();
   }
@@ -23,6 +21,7 @@ class AIClientService {
       this.client = new OpenAI({
         baseURL: 'https://openrouter.ai/api/v1',
         apiKey: key,
+        timeout: 5000, // 5s timeout prevents hanging on upstream rate-limited providers
         defaultHeaders: {
           'HTTP-Referer': config.clientUrl || 'http://localhost:5173',
           'X-Title': 'LegalLens Document Intelligence',
@@ -63,8 +62,11 @@ class AIClientService {
       return fallbackGenerator();
     }
 
-    // Try primary user model first, then fallback models if rate-limited
-    const modelsToTry = [this.primaryModel, ...this.fallbackModels.filter(m => m !== this.primaryModel)];
+    // Try primary user model, then 1 fast companion free model if rate-limited
+    const modelsToTry = [this.primaryModel];
+    if (!modelsToTry.includes('liquid/lfm-2.5-2.6b:free')) {
+      modelsToTry.push('liquid/lfm-2.5-2.6b:free');
+    }
 
     for (const model of modelsToTry) {
       try {
@@ -98,11 +100,7 @@ class AIClientService {
 
         return JSON.parse(cleaned) as T;
       } catch (err: any) {
-        console.warn(`[AIClient] Call to model '${model}' yielded error (${err?.status || err?.message}). Trying next cascade tier...`);
-        // If 429, continue to next model in cascade
-        if (err?.status === 429) {
-          continue;
-        }
+        console.warn(`[AIClient] Call to model '${model}' yielded error (${err?.status || err?.message}). Failing over...`);
       }
     }
 
