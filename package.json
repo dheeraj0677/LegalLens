@@ -1,0 +1,33 @@
+{
+  "name": "legallens-workspace",
+  "version": "1.0.0",
+  "description": "LegalLens - GenAI-Powered Legal Document Intelligence & Accessible Assistance",
+  "private": true,
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace=server & npm run dev --workspace=client",
+    "dev:server": "npm run dev --workspace=server",
+    "dev:client": "npm run dev --workspace=client",
+    "build": "npm run build --workspace=server && npm run build --workspace=client",
+    "build:server": "npm run build --workspace=server",
+    "build:client": "npm run build --workspace=client",
+    "test": "npm run test --workspace=server && npm run test --workspace=client",
+    "test:server": "npm run test --workspace=server",
+    "test:client": "npm run test --workspace=client",
+    "lint": "npm run lint --workspace=server && npm run lint --workspace=client"
+  },
+  "keywords": [
+    "legal-tech",
+    "genai",
+    "openrouter",
+    "document-analyzer",
+    "contract-comparison",
+    "accessibility",
+    "wcag"
+  ],
+  "author": "LegalLens Team",
+  "license": "MIT"
+}
