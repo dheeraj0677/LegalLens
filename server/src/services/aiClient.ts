@@ -3,8 +3,17 @@ import { config } from '../config';
 
 class AIClientService {
   private client: OpenAI | null = null;
+  private primaryModel: string;
+  private fallbackModels: string[];
 
   constructor() {
+    this.primaryModel = config.openRouterModel || 'qwen/qwen3.8-27b:free';
+    this.fallbackModels = [
+      this.primaryModel,
+      'liquid/lfm-2.5-2.6b:free',
+      'nvidia/nemotron-3.5-lightning:free',
+      'z-ai/glm-5.2:free',
+    ];
     this.initClient();
   }
 
@@ -15,7 +24,7 @@ class AIClientService {
         baseURL: 'https://openrouter.ai/api/v1',
         apiKey: key,
         defaultHeaders: {
-          'HTTP-Referer': 'http://localhost:5173',
+          'HTTP-Referer': config.clientUrl || 'http://localhost:5173',
           'X-Title': 'LegalLens Document Intelligence',
         },
       });
@@ -30,7 +39,7 @@ class AIClientService {
   }
 
   public getModel(): string {
-    return config.openRouterModel;
+    return this.primaryModel;
   }
 
   /**
@@ -41,51 +50,59 @@ class AIClientService {
     userPrompt: string,
     fallbackGenerator: () => T
   ): Promise<T> {
-    // Re-check client in case key was added dynamically
     if (!this.client && this.hasActiveKey()) {
       this.initClient();
     }
 
     if (!this.client) {
-      // Return high-fidelity domain fallback when key is not yet set
       return fallbackGenerator();
     }
 
-    try {
-      const response = await this.client.chat.completions.create({
-        model: this.getModel(),
-        messages: [
-          {
-            role: 'system',
-            content: `${systemPrompt}\n\nIMPORTANT: You must return ONLY valid, parseable JSON matching the requested structure. Do not include markdown code blocks, backticks, or explanatory text.`,
-          },
-          {
-            role: 'user',
-            content: userPrompt,
-          },
-        ],
-        temperature: 0.1, // Low temperature for high consistency and factual legal extraction
-        response_format: { type: 'json_object' },
-      });
+    // Try primary user model first, then fallback models if rate-limited
+    const modelsToTry = [this.primaryModel, ...this.fallbackModels.filter(m => m !== this.primaryModel)];
 
-      const content = response.choices[0]?.message?.content;
-      if (!content) {
-        throw new Error('Empty response received from OpenRouter model.');
+    for (const model of modelsToTry) {
+      try {
+        const response = await this.client.chat.completions.create({
+          model,
+          messages: [
+            {
+              role: 'system',
+              content: `${systemPrompt}\n\nIMPORTANT: You must return ONLY valid, parseable JSON matching the requested structure. Do not include markdown code blocks, backticks, or explanatory text.`,
+            },
+            {
+              role: 'user',
+              content: userPrompt,
+            },
+          ],
+          temperature: 0.1,
+          response_format: { type: 'json_object' },
+        });
+
+        const content = response.choices[0]?.message?.content;
+        if (!content) {
+          throw new Error(`Empty response received from model ${model}.`);
+        }
+
+        const cleaned = content
+          .trim()
+          .replace(/^```json\s*/i, '')
+          .replace(/^```\s*/i, '')
+          .replace(/```$/i, '')
+          .trim();
+
+        return JSON.parse(cleaned) as T;
+      } catch (err: any) {
+        console.warn(`[AIClient] Call to model '${model}' yielded error (${err?.status || err?.message}). Trying next cascade tier...`);
+        // If 429, continue to next model in cascade
+        if (err?.status === 429) {
+          continue;
+        }
       }
-
-      // Clean possible markdown code fences if model returned them
-      const cleaned = content
-        .trim()
-        .replace(/^```json\s*/i, '')
-        .replace(/^```\s*/i, '')
-        .replace(/```$/i, '')
-        .trim();
-
-      return JSON.parse(cleaned) as T;
-    } catch (err) {
-      console.warn('[AIClient] OpenRouter call failed, engaging domain fallback engine:', err);
-      return fallbackGenerator();
     }
+
+    console.warn('[AIClient] Upstream OpenRouter models unavailable or rate-limited; engaging domain intelligence engine.');
+    return fallbackGenerator();
   }
 }
 
