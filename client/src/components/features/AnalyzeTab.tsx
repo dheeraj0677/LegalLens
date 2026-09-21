@@ -11,13 +11,13 @@ import {
   Square,
   HelpCircle,
   Download,
-  Filter,
   ChevronDown,
   ChevronUp,
   Copy,
   Check,
   RotateCcw,
-  Zap,
+  Compass,
+  ArrowRight,
 } from 'lucide-react';
 
 interface AnalyzeTabProps {
@@ -43,7 +43,7 @@ export const AnalyzeTab: React.FC<AnalyzeTabProps> = ({ samplePresets }) => {
     const title = titleToUse !== undefined ? titleToUse : docTitle;
 
     if (!text || text.trim().length === 0) {
-      setError('Please paste a legal document or select a sample preset.');
+      setError('Please paste a legal document or select a curated Italian preset.');
       return;
     }
 
@@ -58,7 +58,6 @@ export const AnalyzeTab: React.FC<AnalyzeTabProps> = ({ samplePresets }) => {
     try {
       const res = await apiService.analyzeDocument(text, title || undefined);
       setResult(res);
-      // Auto-expand high & critical clauses by default
       const initialExpanded: Record<string, boolean> = {};
       res.clauses.forEach(c => {
         if (c.riskLevel === 'CRITICAL' || c.riskLevel === 'HIGH') {
@@ -116,23 +115,23 @@ export const AnalyzeTab: React.FC<AnalyzeTabProps> = ({ samplePresets }) => {
   const exportReport = () => {
     if (!result) return;
     const lines = [
-      `# LegalLens Analysis: ${result.documentTitle}`,
-      `Generated on: ${new Date(result.analyzedAt).toLocaleString()}`,
-      `Overall Risk: ${result.overallRiskLevel} (${result.overallRiskScore}/100)`,
-      `Document Type: ${result.documentType}`,
+      `# LegalLens Intelligence Audit: ${result.documentTitle}`,
+      `Audited: ${new Date(result.analyzedAt).toLocaleString()}`,
+      `Risk Profile: ${result.overallRiskLevel} (Index: ${result.overallRiskScore}/100)`,
+      `Classification: ${result.documentType}`,
       '',
-      '## Executive Summary',
+      '## Executive Brief',
       result.executiveSummary,
       '',
-      '## Action Checklist',
+      '## Actionable Governance Checklist',
       ...result.actionChecklist.map(t => `- [${completedTasks[t.id] ? 'X' : ' '}] (${t.priority} Priority) ${t.task}`),
       '',
-      '## Key Questions for Your Lawyer',
+      '## Strategic Counsel Inquiries',
       ...result.suggestedQuestionsForLawyer.map(q => `1. ${q}`),
       '',
-      '## Clause Risk Breakdown',
+      '## Clause Risk Dissection',
       ...result.clauses.map(c => 
-        `### ${c.heading} [${c.riskLevel} RISK - ${c.riskScore}/10]\nCategory: ${c.category}\n\n**Plain Meaning:**\n${c.plainExplanation}\n\n**Risk Context:**\n${c.riskReason}\n\n**Suggested Action:**\n${c.suggestedAction}\n\n---\n`
+        `### ${c.heading} [${c.riskLevel} RISK - ${c.riskScore}/10]\nCategory: ${c.category}\n\n**Plain Meaning:**\n${c.plainExplanation}\n\n**Risk Context:**\n${c.riskReason}\n\n**Actionable Safeguard:**\n${c.suggestedAction}\n\n---\n`
       ),
       '',
       '> LegalLens is an assistive tool and does not constitute formal legal advice.',
@@ -142,7 +141,7 @@ export const AnalyzeTab: React.FC<AnalyzeTabProps> = ({ samplePresets }) => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `${result.documentTitle.toLowerCase().replace(/\W+/g, '-')}-legallens-report.md`;
+    a.download = `${result.documentTitle.toLowerCase().replace(/\W+/g, '-')}-legallens-audit.md`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -156,84 +155,129 @@ export const AnalyzeTab: React.FC<AnalyzeTabProps> = ({ samplePresets }) => {
   const totalTasks = result?.actionChecklist.length || 0;
 
   return (
-    <div className="flex flex-col gap-8 animate-fade-in" style={{ padding: '2rem 0' }}>
+    <div className="flex flex-col gap-10 animate-fade-in" style={{ padding: '2.5rem 0' }}>
       
-      {/* Hero Intro */}
-      <div className="flex flex-col gap-2">
-        <h1 style={{ letterSpacing: '-0.02em' }}>
-          Document Risk & Clause Intelligence
+      {/* Italian Editorial Hero Title */}
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-2">
+          <span
+            style={{
+              fontSize: '0.75rem',
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              fontWeight: 800,
+              color: 'var(--accent-gold)',
+            }}
+          >
+            PRECISION LEGAL AUDITING
+          </span>
+          <span style={{ color: 'var(--border-subtle)' }}>/</span>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>COLLEZIONE MILANO</span>
+        </div>
+
+        <h1 style={{ letterSpacing: '-0.03em', fontSize: 'clamp(2.4rem, 4.5vw, 3.2rem)' }}>
+          Contract Risk Architecture <span className="font-editorial" style={{ fontWeight: 400, color: 'var(--accent-gold)' }}>& Clause Intelligence</span>
         </h1>
-        <p style={{ fontSize: '1.05rem', maxWidth: '800px' }}>
-          Instantly dissect contracts, discover hidden liability traps, unpack confusing legal wording into 8th-grade English, and generate actionable lawyer question lists.
+        
+        <p style={{ fontSize: '1.1rem', maxWidth: '820px', color: 'var(--text-secondary)', lineHeight: 1.65 }}>
+          Architectural contract dissection and risk discovery. Unravels hidden liability traps, translates labyrinthine clauses into pure everyday clarity, and equips you with actionable negotiation checklists.
         </p>
       </div>
 
-      {/* Preset Quick Loader Buttons */}
+      {/* 3D Floating Curated Preset Cards */}
       {samplePresets.length > 0 && !result && (
-        <div className="glass-panel" style={{ padding: '1.25rem' }}>
-          <div className="flex items-center gap-2" style={{ marginBottom: '0.75rem' }}>
-            <Zap size={16} color="#3b82f6" />
-            <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Quick Start Presets (1-Click Test)
-            </span>
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Compass size={18} color="var(--accent-gold)" />
+              <span style={{ fontSize: '0.825rem', fontWeight: 800, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-primary)' }}>
+                Curated Verification Presets (1-Click Test)
+              </span>
+            </div>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Ready for instant review</span>
           </div>
-          <div className="grid grid-cols-3 gap-3">
+
+          <div className="grid grid-cols-3 gap-4">
             {samplePresets.map(p => (
-              <button
+              <div
                 key={p.id}
                 onClick={() => handleLoadPreset(p)}
-                className="btn btn-secondary card-interactive"
+                className="glass-panel card-interactive"
                 style={{
-                  textAlign: 'left',
+                  padding: '1.5rem',
                   display: 'flex',
                   flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  padding: '0.85rem',
-                  height: 'auto',
+                  justifyContent: 'space-between',
+                  minHeight: '140px',
                 }}
               >
-                <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>{p.title}</span>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px' }}>{p.category}</span>
-              </button>
+                <div>
+                  <span style={{
+                    fontSize: '0.65rem',
+                    letterSpacing: '0.08em',
+                    textTransform: 'uppercase',
+                    fontWeight: 800,
+                    color: 'var(--accent-gold)',
+                    background: 'var(--bg-tertiary)',
+                    padding: '2px 8px',
+                    borderRadius: '9999px',
+                  }}>
+                    {p.category}
+                  </span>
+                  <h3 style={{ fontSize: '1.05rem', margin: '0.6rem 0 0.25rem 0', color: 'var(--text-primary)' }}>
+                    {p.title}
+                  </h3>
+                  <p style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
+                    {p.description}
+                  </p>
+                </div>
+                
+                <div className="flex items-center gap-1" style={{ marginTop: '1rem', color: 'var(--text-primary)', fontSize: '0.8rem', fontWeight: 700 }}>
+                  <span>Analyze Contract</span>
+                  <ArrowRight size={14} color="var(--accent-gold)" />
+                </div>
+              </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Document Input Panel */}
-      <div className="glass-panel" style={{ padding: '1.5rem' }}>
-        <div className="flex items-center justify-between" style={{ marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+      {/* 3D Sculpted Document Ingestion Console */}
+      <div className="glass-panel" style={{ padding: '2rem' }}>
+        <div className="flex items-center justify-between" style={{ marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
           <div>
             <label htmlFor="doc-title-input" className="form-label">
-              Document Title (Optional)
+              Document Designation
             </label>
             <input
               id="doc-title-input"
               type="text"
-              placeholder="e.g. Master Services Agreement v2"
+              placeholder="e.g., Master SaaS Subscription Agreement — Milano Edition"
               value={docTitle}
               onChange={e => setDocTitle(e.target.value)}
               style={{
-                background: 'rgba(15, 23, 42, 0.6)',
-                border: '1px solid var(--border-subtle)',
+                background: 'var(--bg-secondary)',
+                border: '1.5px solid var(--border-subtle)',
                 borderRadius: 'var(--radius-sm)',
-                padding: '0.5rem 0.85rem',
+                padding: '0.65rem 1rem',
                 color: 'var(--text-primary)',
-                fontSize: '0.9rem',
-                minWidth: '280px',
+                fontSize: '0.925rem',
+                fontWeight: 600,
+                minWidth: '340px',
+                boxShadow: 'var(--shadow-inset)',
               }}
             />
           </div>
 
-          {/* File Upload Trigger */}
-          <div className="flex items-center gap-2">
+          {/* Action Hardware Controls */}
+          <div className="flex items-center gap-3">
             <label
               htmlFor="doc-file-upload"
-              className="btn btn-outline"
+              className="btn btn-secondary"
               style={{ cursor: 'pointer', fontSize: '0.85rem' }}
             >
-              <Upload size={16} />
-              <span>Upload Text/File</span>
+              <Upload size={16} strokeWidth={2.2} />
+              <span>Upload Document</span>
               <input
                 id="doc-file-upload"
                 type="file"
@@ -246,8 +290,8 @@ export const AnalyzeTab: React.FC<AnalyzeTabProps> = ({ samplePresets }) => {
             {docText && (
               <button
                 onClick={() => { setDocText(''); setDocTitle(''); setResult(null); setError(null); }}
-                className="btn btn-secondary"
-                title="Clear text"
+                className="btn btn-outline"
+                title="Reset Document"
               >
                 <RotateCcw size={15} />
                 <span>Reset</span>
@@ -256,149 +300,185 @@ export const AnalyzeTab: React.FC<AnalyzeTabProps> = ({ samplePresets }) => {
           </div>
         </div>
 
-        {/* Textarea for document */}
+        {/* 3D Inset Text Area */}
         <div>
           <label htmlFor="doc-text-area" className="form-label flex items-center justify-between">
-            <span>Paste Contract / Legal Text</span>
-            <span style={{ fontSize: '0.75rem', color: docText.length > 90000 ? '#ef4444' : 'var(--text-muted)' }}>
-              {docText.length.toLocaleString()} / 100,000 characters
+            <span>Contract Text Ingestion</span>
+            <span style={{ fontSize: '0.78rem', fontWeight: 600, color: docText.length > 90000 ? 'var(--risk-critical)' : 'var(--text-muted)' }}>
+              {docText.length.toLocaleString()} / 100,000 chars
             </span>
           </label>
           <textarea
             id="doc-text-area"
             rows={8}
             className="textarea-custom"
-            placeholder="Paste your legal agreement, contract, NDA, terms of service, or employment offer here..."
+            placeholder="Paste your legal agreement, contract clauses, non-disclosure terms, or commercial covenants here..."
             value={docText}
             onChange={e => setDocText(e.target.value)}
           />
         </div>
 
-        {/* Error Notification */}
+        {/* Error Callout */}
         {error && (
           <div
             role="alert"
             style={{
-              marginTop: '1rem',
-              padding: '0.85rem',
+              marginTop: '1.25rem',
+              padding: '1rem',
               borderRadius: 'var(--radius-sm)',
               background: 'var(--risk-critical-bg)',
-              border: '1px solid var(--risk-critical-border)',
-              color: '#f87171',
+              border: '1.5px solid var(--risk-critical-border)',
+              color: 'var(--risk-critical)',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
-              fontSize: '0.875rem',
+              gap: '0.75rem',
+              fontSize: '0.9rem',
+              fontWeight: 600,
             }}
           >
-            <AlertCircle size={18} />
+            <AlertCircle size={20} />
             <span>{error}</span>
           </div>
         )}
 
-        {/* Action Button */}
-        <div style={{ marginTop: '1.25rem', display: 'flex', justifyContent: 'flex-end' }}>
+        {/* 3D Submission Button */}
+        <div style={{ marginTop: '1.5rem', display: 'flex', justifyContent: 'flex-end' }}>
           <button
             id="analyze-submit-btn"
             onClick={() => handleAnalyze()}
             disabled={loading || !docText.trim()}
             className="btn btn-primary"
-            style={{ padding: '0.75rem 1.75rem', fontSize: '1rem' }}
+            style={{ padding: '0.85rem 2.25rem', fontSize: '1rem' }}
           >
             {loading ? (
               <>
                 <Sparkles className="animate-spin" size={18} />
-                <span>Analyzing Clauses with GenAI...</span>
+                <span>Architecting Risk Profile...</span>
               </>
             ) : (
               <>
-                <Sparkles size={18} />
-                <span>Run Legal Risk Intelligence</span>
+                <Sparkles size={18} color="#dfb15b" />
+                <span>Perform Legal Risk Audit</span>
               </>
             )}
           </button>
         </div>
       </div>
 
-      {/* Analysis Results Display */}
+      {/* Analysis Results Display (Italian Sculpted Dossier) */}
       {result && (
         <div className="flex flex-col gap-8 animate-fade-in">
           
           {/* Top Overview Grid */}
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-3 gap-6">
             
-            {/* Executive Summary Card (Spans 2 columns) */}
-            <div className="glass-panel" style={{ gridColumn: 'span 2', padding: '1.5rem' }}>
-              <div className="flex items-center justify-between" style={{ marginBottom: '0.75rem' }}>
+            {/* Executive Summary (Spans 2 columns) */}
+            <div className="glass-panel" style={{ gridColumn: 'span 2', padding: '2rem' }}>
+              <div className="flex items-center justify-between" style={{ marginBottom: '1rem' }}>
                 <div className="flex items-center gap-2">
-                  <FileText size={20} color="#3b82f6" />
-                  <h2 style={{ fontSize: '1.25rem', margin: 0 }}>Executive Brief: {result.documentTitle}</h2>
+                  <FileText size={22} color="var(--accent-gold)" />
+                  <h2 style={{ fontSize: '1.4rem', margin: 0 }}>Executive Dossier: {result.documentTitle}</h2>
                 </div>
-                <span style={{ fontSize: '0.8rem', padding: '3px 8px', borderRadius: '6px', background: 'var(--bg-tertiary)', color: 'var(--text-secondary)' }}>
+                <span style={{
+                  fontSize: '0.75rem',
+                  letterSpacing: '0.05em',
+                  fontWeight: 800,
+                  textTransform: 'uppercase',
+                  padding: '4px 10px',
+                  borderRadius: '9999px',
+                  background: 'var(--bg-tertiary)',
+                  color: 'var(--text-secondary)',
+                  border: '1px solid var(--border-subtle)',
+                }}>
                   {result.documentType}
                 </span>
               </div>
-              <p style={{ fontSize: '0.95rem', lineHeight: 1.65, color: 'var(--text-primary)' }}>
+
+              <p style={{ fontSize: '1.025rem', lineHeight: 1.7, color: 'var(--text-primary)' }}>
                 {result.executiveSummary}
               </p>
-              <div className="flex items-center gap-4" style={{ marginTop: '1rem', paddingTop: '0.75rem', borderTop: '1px solid var(--border-subtle)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                <span>Analyzed: {new Date(result.analyzedAt).toLocaleDateString()}</span>
+
+              <div className="flex items-center gap-4" style={{ marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid var(--border-subtle)', fontSize: '0.825rem', color: 'var(--text-muted)' }}>
+                <span>Audited: {new Date(result.analyzedAt).toLocaleDateString()}</span>
                 <span>•</span>
-                <span>{result.clauses.length} Structured Clauses Extracted</span>
+                <span>{result.clauses.length} Structured Clauses Evaluated</span>
                 <span>•</span>
                 <span>{result.charCount.toLocaleString()} Characters Processed</span>
               </div>
             </div>
 
-            {/* Overall Risk Score Card */}
-            <div className="glass-panel flex flex-col items-center justify-center text-center" style={{ padding: '1.5rem' }}>
-              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Overall Risk Score
+            {/* 3D Sculpted Risk Dial Dial / Meter Card */}
+            <div className="glass-panel flex flex-col items-center justify-center text-center" style={{ padding: '2rem' }}>
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 800 }}>
+                Aggregate Risk Index
               </span>
-              <div style={{ margin: '0.75rem 0', position: 'relative' }}>
-                <div style={{
-                  fontSize: '3.25rem',
+
+              {/* 3D Embossed Score Badge */}
+              <div style={{
+                margin: '1rem 0',
+                width: '110px',
+                height: '110px',
+                borderRadius: '50%',
+                background: 'linear-gradient(145deg, #ffffff 0%, #f3efe6 100%)',
+                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08), inset 0 2px 4px #ffffff, inset 0 -2px 4px rgba(0,0,0,0.05)',
+                border: '2px solid rgba(184, 134, 11, 0.3)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <span style={{
+                  fontSize: '2.6rem',
                   fontFamily: 'var(--font-display)',
-                  fontWeight: 800,
+                  fontWeight: 900,
                   lineHeight: 1,
-                  color: result.overallRiskScore > 70 ? '#ef4444' : result.overallRiskScore > 40 ? '#f59e0b' : '#10b981'
+                  color: result.overallRiskScore > 70 ? 'var(--risk-critical)' : result.overallRiskScore > 40 ? 'var(--risk-medium)' : 'var(--risk-low)',
                 }}>
                   {result.overallRiskScore}
-                  <span style={{ fontSize: '1.25rem', color: 'var(--text-muted)', fontWeight: 500 }}>/100</span>
-                </div>
+                </span>
+                <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700, letterSpacing: '0.04em' }}>/ 100</span>
               </div>
+
               <RiskBadge level={result.overallRiskLevel} size="lg" />
 
-              {/* Mini distribution pill */}
-              <div className="flex items-center gap-2" style={{ marginTop: '1.25rem', fontSize: '0.75rem' }}>
-                <span style={{ color: '#ef4444' }}>{result.riskDistribution.critical} Crit</span>
+              {/* Breakdown Pills */}
+              <div className="flex items-center gap-2" style={{ marginTop: '1.25rem', fontSize: '0.78rem', fontWeight: 700 }}>
+                <span style={{ color: 'var(--risk-critical)' }}>{result.riskDistribution.critical} Crit</span>
                 <span>•</span>
-                <span style={{ color: '#f97316' }}>{result.riskDistribution.high} High</span>
+                <span style={{ color: 'var(--risk-high)' }}>{result.riskDistribution.high} High</span>
                 <span>•</span>
-                <span style={{ color: '#f59e0b' }}>{result.riskDistribution.medium} Med</span>
+                <span style={{ color: 'var(--risk-medium)' }}>{result.riskDistribution.medium} Med</span>
                 <span>•</span>
-                <span style={{ color: '#10b981' }}>{result.riskDistribution.low} Low</span>
+                <span style={{ color: 'var(--risk-low)' }}>{result.riskDistribution.low} Low</span>
               </div>
             </div>
 
           </div>
 
-          {/* Action Checklist & Lawyer Inquiries */}
-          <div className="grid grid-cols-2 gap-4">
+          {/* Actionable Governance Checklist & Counsel Inquiries */}
+          <div className="grid grid-cols-2 gap-6">
             
-            {/* Interactive Action Checklist */}
-            <div className="glass-panel" style={{ padding: '1.5rem' }}>
-              <div className="flex items-center justify-between" style={{ marginBottom: '1rem' }}>
+            {/* 3D Action Checklist */}
+            <div className="glass-panel" style={{ padding: '2rem' }}>
+              <div className="flex items-center justify-between" style={{ marginBottom: '1.25rem' }}>
                 <div className="flex items-center gap-2">
-                  <CheckSquare size={18} color="#10b981" />
-                  <h3 style={{ margin: 0 }}>Actionable Checklist</h3>
+                  <CheckSquare size={20} color="var(--risk-low)" />
+                  <h3 style={{ margin: 0, fontSize: '1.2rem' }}>Governance Checklist</h3>
                 </div>
-                <span style={{ fontSize: '0.8rem', padding: '2px 8px', borderRadius: '9999px', background: 'rgba(16, 185, 129, 0.15)', color: '#34d399', fontWeight: 600 }}>
-                  {completedCount} of {totalTasks} Completed
+                <span style={{
+                  fontSize: '0.75rem',
+                  fontWeight: 800,
+                  padding: '3px 10px',
+                  borderRadius: '9999px',
+                  background: 'var(--risk-low-bg)',
+                  color: 'var(--risk-low)',
+                  border: '1px solid var(--risk-low-border)',
+                }}>
+                  {completedCount} of {totalTasks} Satisfied
                 </span>
               </div>
 
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-3">
                 {result.actionChecklist.map(task => {
                   const done = Boolean(completedTasks[task.id]);
                   return (
@@ -409,36 +489,40 @@ export const AnalyzeTab: React.FC<AnalyzeTabProps> = ({ samplePresets }) => {
                       style={{
                         display: 'flex',
                         alignItems: 'flex-start',
-                        gap: '0.75rem',
-                        padding: '0.75rem',
+                        gap: '0.85rem',
+                        padding: '1rem',
                         borderRadius: 'var(--radius-sm)',
-                        background: done ? 'rgba(16, 185, 129, 0.05)' : 'rgba(255, 255, 255, 0.02)',
-                        border: done ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid var(--border-subtle)',
+                        background: done ? 'var(--bg-tertiary)' : '#ffffff',
+                        border: done ? '1px solid rgba(4, 120, 87, 0.3)' : '1px solid var(--border-subtle)',
+                        boxShadow: done ? 'none' : 'var(--shadow-3d-white)',
                       }}
                     >
                       <button
                         type="button"
                         aria-label={`Mark task as ${done ? 'incomplete' : 'complete'}`}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: done ? '#10b981' : 'var(--text-muted)', marginTop: '2px' }}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: done ? 'var(--risk-low)' : 'var(--text-muted)', marginTop: '2px' }}
                       >
-                        {done ? <CheckSquare size={18} /> : <Square size={18} />}
+                        {done ? <CheckSquare size={20} /> : <Square size={20} />}
                       </button>
                       <div style={{ flex: 1 }}>
                         <span style={{
-                          fontSize: '0.875rem',
+                          fontSize: '0.925rem',
+                          fontWeight: done ? 500 : 600,
                           color: done ? 'var(--text-muted)' : 'var(--text-primary)',
-                          textDecoration: done ? 'line-through' : 'none'
+                          textDecoration: done ? 'line-through' : 'none',
+                          lineHeight: 1.5,
                         }}>
                           {task.task}
                         </span>
-                        <div style={{ marginTop: '4px' }}>
+                        <div style={{ marginTop: '6px' }}>
                           <span style={{
-                            fontSize: '0.65rem',
-                            fontWeight: 700,
-                            padding: '1px 5px',
+                            fontSize: '0.675rem',
+                            fontWeight: 800,
+                            letterSpacing: '0.05em',
+                            padding: '2px 7px',
                             borderRadius: '4px',
-                            background: task.priority === 'HIGH' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(245, 158, 11, 0.15)',
-                            color: task.priority === 'HIGH' ? '#f87171' : '#fbbf24',
+                            background: task.priority === 'HIGH' ? 'var(--risk-critical-bg)' : 'var(--risk-medium-bg)',
+                            color: task.priority === 'HIGH' ? 'var(--risk-critical)' : 'var(--risk-medium)',
                           }}>
                             {task.priority} PRIORITY
                           </span>
@@ -450,40 +534,42 @@ export const AnalyzeTab: React.FC<AnalyzeTabProps> = ({ samplePresets }) => {
               </div>
             </div>
 
-            {/* Questions for Your Lawyer */}
-            <div className="glass-panel" style={{ padding: '1.5rem' }}>
-              <div className="flex items-center justify-between" style={{ marginBottom: '1rem' }}>
+            {/* Strategic Questions for Legal Counsel */}
+            <div className="glass-panel" style={{ padding: '2rem' }}>
+              <div className="flex items-center justify-between" style={{ marginBottom: '1.25rem' }}>
                 <div className="flex items-center gap-2">
-                  <HelpCircle size={18} color="#6366f1" />
-                  <h3 style={{ margin: 0 }}>Questions for Your Attorney</h3>
+                  <HelpCircle size={20} color="var(--accent-gold)" />
+                  <h3 style={{ margin: 0, fontSize: '1.2rem' }}>Questions for Your Attorney</h3>
                 </div>
                 <button
                   onClick={exportReport}
-                  className="btn btn-outline"
-                  style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem' }}
+                  className="btn btn-secondary"
+                  style={{ padding: '0.45rem 0.9rem', fontSize: '0.8rem' }}
                 >
-                  <Download size={13} />
-                  <span>Export Report</span>
+                  <Download size={14} />
+                  <span>Export Audit</span>
                 </button>
               </div>
 
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-3">
                 {result.suggestedQuestionsForLawyer.map((q, idx) => (
                   <div
                     key={idx}
                     style={{
-                      padding: '0.75rem',
+                      padding: '1rem',
                       borderRadius: 'var(--radius-sm)',
-                      background: 'rgba(99, 102, 241, 0.05)',
-                      border: '1px solid rgba(99, 102, 241, 0.15)',
-                      fontSize: '0.875rem',
+                      background: 'var(--bg-secondary)',
+                      border: '1px solid var(--border-subtle)',
+                      boxShadow: 'var(--shadow-inset)',
+                      fontSize: '0.9rem',
                       color: 'var(--text-primary)',
                       display: 'flex',
                       alignItems: 'flex-start',
-                      gap: '0.5rem',
+                      gap: '0.75rem',
+                      lineHeight: 1.5,
                     }}
                   >
-                    <span style={{ color: '#818cf8', fontWeight: 700 }}>{idx + 1}.</span>
+                    <span style={{ color: 'var(--accent-gold)', fontWeight: 800, fontSize: '0.95rem' }}>{idx + 1}.</span>
                     <span>{q}</span>
                   </div>
                 ))}
@@ -492,27 +578,43 @@ export const AnalyzeTab: React.FC<AnalyzeTabProps> = ({ samplePresets }) => {
 
           </div>
 
-          {/* Clause-by-Clause Deep Dive Explorer */}
-          <div className="glass-panel" style={{ padding: '1.5rem' }}>
-            <div className="flex items-center justify-between" style={{ marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
-              <div className="flex items-center gap-2">
-                <Filter size={18} color="#3b82f6" />
-                <h3 style={{ margin: 0 }}>Clause-by-Clause Risk Breakdown ({result.clauses.length})</h3>
+          {/* Clause-by-Clause Dissection Explorer */}
+          <div className="glass-panel" style={{ padding: '2rem' }}>
+            <div className="flex items-center justify-between" style={{ marginBottom: '1.75rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.3rem' }}>
+                  Clause-by-Clause Risk Dissection ({result.clauses.length})
+                </h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: '4px 0 0 0' }}>
+                  Click any provision to uncover plain meaning, trap alerts, and recommended counter-actions
+                </p>
               </div>
 
-              {/* Risk Filter Buttons */}
-              <div className="flex items-center gap-1" style={{ background: 'var(--bg-tertiary)', padding: '3px', borderRadius: '8px' }}>
+              {/* 3D Segmented Filter Controls */}
+              <div
+                className="flex items-center gap-1"
+                style={{
+                  background: 'var(--bg-tertiary)',
+                  padding: '4px',
+                  borderRadius: '12px',
+                  border: '1px solid var(--border-subtle)',
+                  boxShadow: 'var(--shadow-inset)',
+                }}
+              >
                 {['ALL', 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'].map(lvl => (
                   <button
                     key={lvl}
                     onClick={() => setFilterRisk(lvl)}
                     className="btn"
                     style={{
-                      padding: '0.25rem 0.6rem',
+                      padding: '0.35rem 0.75rem',
                       fontSize: '0.75rem',
-                      borderRadius: '6px',
-                      background: filterRisk === lvl ? 'var(--accent-indigo)' : 'transparent',
-                      color: filterRisk === lvl ? '#ffffff' : 'var(--text-secondary)',
+                      borderRadius: '8px',
+                      background: filterRisk === lvl ? '#ffffff' : 'transparent',
+                      color: filterRisk === lvl ? 'var(--text-primary)' : 'var(--text-muted)',
+                      boxShadow: filterRisk === lvl ? '0 2px 0 #ded8cd, 0 4px 8px rgba(0,0,0,0.04)' : 'none',
+                      border: filterRisk === lvl ? '1px solid var(--border-subtle)' : 'none',
+                      fontWeight: filterRisk === lvl ? 800 : 600,
                     }}
                   >
                     {lvl}
@@ -521,99 +623,134 @@ export const AnalyzeTab: React.FC<AnalyzeTabProps> = ({ samplePresets }) => {
               </div>
             </div>
 
-            {/* List of Clauses */}
-            <div className="flex flex-col gap-3">
+            {/* Clauses List */}
+            <div className="flex flex-col gap-4">
               {filteredClauses.map(clause => {
                 const isExpanded = Boolean(expandedClauses[clause.id]);
                 return (
                   <div
                     key={clause.id}
                     style={{
-                      border: '1px solid var(--border-subtle)',
-                      borderRadius: 'var(--radius-sm)',
-                      background: 'rgba(15, 23, 42, 0.5)',
+                      border: '1.5px solid var(--border-subtle)',
+                      borderRadius: 'var(--radius-md)',
+                      background: '#ffffff',
+                      boxShadow: 'var(--shadow-3d-white)',
                       overflow: 'hidden',
+                      transition: 'all var(--transition-fast)',
                     }}
                   >
                     {/* Header Row */}
                     <div
                       onClick={() => toggleClause(clause.id)}
                       className="flex items-center justify-between card-interactive"
-                      style={{ padding: '1rem', borderBottom: isExpanded ? '1px solid var(--border-subtle)' : 'none' }}
+                      style={{
+                        padding: '1.25rem 1.5rem',
+                        borderBottom: isExpanded ? '1px solid var(--border-subtle)' : 'none',
+                        background: isExpanded ? 'var(--bg-secondary)' : '#ffffff',
+                      }}
                     >
                       <div className="flex items-center gap-3">
-                        <span style={{ fontWeight: 700, fontSize: '1rem', color: 'var(--text-primary)' }}>
+                        <span style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-primary)', letterSpacing: '-0.01em' }}>
                           {clause.heading}
                         </span>
-                        <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '4px', background: 'var(--bg-tertiary)', color: 'var(--text-muted)' }}>
+                        <span style={{
+                          fontSize: '0.725rem',
+                          fontWeight: 700,
+                          padding: '2px 8px',
+                          borderRadius: '6px',
+                          background: 'var(--bg-tertiary)',
+                          color: 'var(--text-muted)',
+                        }}>
                           {clause.category}
                         </span>
                       </div>
+
                       <div className="flex items-center gap-3">
                         <RiskBadge level={clause.riskLevel} score={clause.riskScore} />
-                        {isExpanded ? <ChevronUp size={18} color="var(--text-muted)" /> : <ChevronDown size={18} color="var(--text-muted)" />}
+                        {isExpanded ? <ChevronUp size={20} color="var(--text-muted)" /> : <ChevronDown size={20} color="var(--text-muted)" />}
                       </div>
                     </div>
 
                     {/* Expanded Detail Body */}
                     {isExpanded && (
-                      <div style={{ padding: '1.25rem', background: 'rgba(10, 15, 28, 0.7)', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      <div style={{ padding: '1.5rem', background: '#ffffff', display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
                         
-                        {/* Plain English Translation */}
-                        <div style={{ padding: '0.85rem', borderRadius: 'var(--radius-sm)', background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.2)' }}>
-                          <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#60a5fa', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-                            Plain English Meaning
+                        {/* Plain English Translation Card */}
+                        <div style={{
+                          padding: '1.25rem',
+                          borderRadius: 'var(--radius-sm)',
+                          background: 'var(--bg-secondary)',
+                          border: '1.5px solid rgba(184, 134, 11, 0.25)',
+                          boxShadow: 'var(--shadow-inset)',
+                        }}>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--accent-gold)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                            Plain Meaning & Core Legal Effect
                           </span>
-                          <p style={{ fontSize: '0.9rem', color: 'var(--text-primary)', margin: '0.25rem 0 0 0' }}>
+                          <p style={{ fontSize: '0.975rem', color: 'var(--text-primary)', margin: '0.4rem 0 0 0', lineHeight: 1.65 }}>
                             {clause.plainExplanation}
                           </p>
                         </div>
 
-                        {/* Risk Reason & Negotiation Tip */}
-                        <div className="grid grid-cols-2 gap-3">
-                          <div style={{ padding: '0.85rem', borderRadius: 'var(--radius-sm)', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.15)' }}>
-                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#f87171', textTransform: 'uppercase' }}>
-                              Risk Context & Trap Alert
+                        {/* Risk & Recommendation Grid */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div style={{
+                            padding: '1.15rem',
+                            borderRadius: 'var(--radius-sm)',
+                            background: 'var(--risk-critical-bg)',
+                            border: '1px solid var(--risk-critical-border)',
+                          }}>
+                            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--risk-critical)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                              Risk Context & Covert Trap Alert
                             </span>
-                            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>
+                            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: '0.4rem 0 0 0', lineHeight: 1.55 }}>
                               {clause.riskReason}
                             </p>
                           </div>
 
-                          <div style={{ padding: '0.85rem', borderRadius: 'var(--radius-sm)', background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.15)' }}>
-                            <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#34d399', textTransform: 'uppercase' }}>
-                              Recommended Counter-Action
+                          <div style={{
+                            padding: '1.15rem',
+                            borderRadius: 'var(--radius-sm)',
+                            background: 'var(--risk-low-bg)',
+                            border: '1px solid var(--risk-low-border)',
+                          }}>
+                            <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--risk-low)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                              Tactical Counter-Measure
                             </span>
-                            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0.25rem 0 0 0' }}>
+                            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', margin: '0.4rem 0 0 0', lineHeight: 1.55 }}>
                               {clause.suggestedAction}
                             </p>
                           </div>
                         </div>
 
-                        {/* Original Raw Text Snippet */}
+                        {/* Raw Original Text Block with Copy Action */}
                         <div>
-                          <div className="flex items-center justify-between" style={{ marginBottom: '0.25rem' }}>
-                            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Original Contract Clause</span>
+                          <div className="flex items-center justify-between" style={{ marginBottom: '0.4rem' }}>
+                            <span style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)' }}>
+                              Verbatim Clause Language
+                            </span>
                             <button
                               onClick={() => copyToClipboard(clause.originalText, clause.id)}
                               className="btn btn-outline"
-                              style={{ padding: '2px 8px', fontSize: '0.7rem' }}
+                              style={{ padding: '3px 9px', fontSize: '0.725rem' }}
                             >
-                              {copiedId === clause.id ? <Check size={12} color="#10b981" /> : <Copy size={12} />}
-                              <span>{copiedId === clause.id ? 'Copied' : 'Copy Text'}</span>
+                              {copiedId === clause.id ? <Check size={13} color="var(--risk-low)" /> : <Copy size={13} />}
+                              <span>{copiedId === clause.id ? 'Copied to Clipboard' : 'Copy Language'}</span>
                             </button>
                           </div>
+                          
                           <div style={{
-                            padding: '0.75rem',
+                            padding: '1rem',
                             borderRadius: 'var(--radius-sm)',
-                            background: 'rgba(0, 0, 0, 0.3)',
+                            background: 'var(--bg-tertiary)',
                             border: '1px solid var(--border-subtle)',
                             fontFamily: 'var(--font-mono)',
-                            fontSize: '0.8rem',
-                            color: 'var(--text-muted)',
+                            fontSize: '0.825rem',
+                            color: 'var(--text-secondary)',
                             whiteSpace: 'pre-wrap',
-                            maxHeight: '140px',
-                            overflowY: 'auto'
+                            maxHeight: '160px',
+                            overflowY: 'auto',
+                            boxShadow: 'var(--shadow-inset)',
+                            lineHeight: 1.6,
                           }}>
                             {clause.originalText}
                           </div>

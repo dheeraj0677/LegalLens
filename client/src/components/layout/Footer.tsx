@@ -1,53 +1,82 @@
-import { AlertCircle, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { CheckCircle2, ShieldCheck, Scale } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   return (
-    <footer style={{ marginTop: 'auto', borderTop: '1px solid var(--border-subtle)', background: 'var(--bg-primary)', padding: '2.5rem 0 1.5rem 0' }}>
-      <div className="container flex flex-col gap-6">
+    <footer
+      style={{
+        marginTop: 'auto',
+        borderTop: '1px solid var(--border-subtle)',
+        background: 'var(--bg-primary)',
+        padding: '3rem 0 2rem 0',
+      }}
+    >
+      <div className="container flex flex-col gap-8">
         
-        {/* Crucial Legal Disclaimer Box (WCAG Accessible) */}
+        {/* Italian Luxury Legal Disclaimer Box */}
         <div
           role="note"
           aria-label="Legal Disclaimer"
           style={{
-            padding: '1.25rem',
+            padding: '1.5rem',
             borderRadius: 'var(--radius-md)',
-            background: 'rgba(245, 158, 11, 0.08)',
-            border: '1px solid rgba(245, 158, 11, 0.3)',
+            background: 'var(--bg-secondary)',
+            border: '1.5px solid var(--border-accent)',
             display: 'flex',
-            gap: '1rem',
+            gap: '1.25rem',
             alignItems: 'flex-start',
+            boxShadow: 'var(--shadow-3d-white)',
           }}
         >
-          <AlertCircle size={22} color="#f59e0b" style={{ flexShrink: 0, marginTop: '2px' }} />
+          <div
+            style={{
+              background: 'var(--bg-tertiary)',
+              padding: '0.65rem',
+              borderRadius: '12px',
+              border: '1px solid var(--border-subtle)',
+              flexShrink: 0,
+            }}
+          >
+            <Scale size={22} color="var(--accent-gold)" />
+          </div>
+
           <div>
-            <h2 style={{ fontSize: '0.9rem', color: '#fbbf24', fontWeight: 700, margin: '0 0 0.25rem 0' }}>
-              Important Legal & AI Transparency Notice
+            <h2 style={{ fontSize: '0.95rem', color: 'var(--text-primary)', fontWeight: 800, margin: '0 0 0.35rem 0', letterSpacing: '-0.01em' }}>
+              Legal Transparency & Advisory Notice — Collezione Milano
             </h2>
-            <p style={{ fontSize: '0.825rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-              LegalLens is an AI-powered document intelligence assistant created to make legal information and basic contracts more accessible and understandable. 
-              <strong> LegalLens does not provide legal advice, legal representation, or replace consultation with a licensed attorney.</strong> 
-              Outputs should be used for research, clause understanding, and negotiation preparation. For binding transactions or formal disputes, always consult qualified legal counsel.
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.6 }}>
+              LegalLens is an AI-powered document intelligence assistant designed to bring clarity, transparency, and accessible understanding to complex contracts and agreements. 
+              <strong> LegalLens does not provide formal legal advice, legal representation, or substitute for consultation with a licensed legal practitioner.</strong> 
+              Audits, comparisons, and risk indexes are generated for research, clause understanding, and negotiation preparation. For binding commercial transactions or judicial disputes, always engage qualified legal counsel.
             </p>
           </div>
         </div>
 
         {/* Footer Meta & Accreditations */}
-        <div className="flex items-center justify-between" style={{ flexWrap: 'wrap', gap: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-subtle)', fontSize: '0.825rem', color: 'var(--text-muted)' }}>
-          <div className="flex items-center gap-4">
-            <span className="flex items-center gap-1">
-              <ShieldCheck size={16} color="#10b981" />
-              <span>Enterprise Privacy: No Client Data Stored</span>
+        <div
+          className="flex items-center justify-between"
+          style={{
+            flexWrap: 'wrap',
+            gap: '1rem',
+            paddingTop: '1.25rem',
+            borderTop: '1px solid var(--border-subtle)',
+            fontSize: '0.825rem',
+            color: 'var(--text-muted)',
+          }}
+        >
+          <div className="flex items-center gap-5">
+            <span className="flex items-center gap-1.5" style={{ fontWeight: 600 }}>
+              <ShieldCheck size={16} color="var(--risk-low)" />
+              <span>Zero Client Secret Retention</span>
             </span>
             <span>•</span>
-            <span className="flex items-center gap-1">
-              <CheckCircle2 size={16} color="#3b82f6" />
-              <span>WCAG 2.2 AA Accessible Design</span>
+            <span className="flex items-center gap-1.5" style={{ fontWeight: 600 }}>
+              <CheckCircle2 size={16} color="var(--accent-gold)" />
+              <span>WCAG 2.2 AA Inclusive Architecture</span>
             </span>
           </div>
 
-          <div className="flex items-center gap-1">
-            <span>Built with precision for accessibility & legal empowerment</span>
+          <div className="flex items-center gap-1.5" style={{ fontWeight: 600, letterSpacing: '0.04em' }}>
+            <span>MILANO • EST. 2026 • GENAI DOCUMENT INTELLIGENCE</span>
           </div>
         </div>
 

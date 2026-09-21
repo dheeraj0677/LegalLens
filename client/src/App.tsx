@@ -10,18 +10,18 @@ import { SampleDocumentPreset } from './types';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'analyze' | 'compare' | 'simplify' | 'qa'>('analyze');
-  const [theme, setTheme] = useState<'dark' | 'light'>('dark');
+  const [theme, setTheme] = useState<'dark' | 'light'>('light');
   const [modelName, setModelName] = useState<string>('google/gemini-2.5-flash');
   const [samplePresets, setSamplePresets] = useState<SampleDocumentPreset[]>([]);
 
-  // Initialize theme from localStorage or preferred system
+  // Initialize theme from localStorage or default to Italian Luxury White
   useEffect(() => {
     const saved = localStorage.getItem('legallens_theme') as 'dark' | 'light' | null;
     if (saved) {
       setTheme(saved);
       document.documentElement.setAttribute('data-theme', saved);
     } else {
-      document.documentElement.setAttribute('data-theme', 'dark');
+      document.documentElement.setAttribute('data-theme', 'light');
     }
   }, []);
 

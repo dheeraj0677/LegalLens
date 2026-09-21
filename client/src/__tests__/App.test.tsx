@@ -49,21 +49,21 @@ describe('LegalLens App Shell', () => {
     render(<App />);
     const compareTabBtn = screen.getByRole('tab', { name: /Compare Contracts/i });
     fireEvent.click(compareTabBtn);
-    expect(screen.getByText(/Contract Comparison & Redline Risk Differ/i)).toBeInTheDocument();
+    expect(screen.getByText(/Bilateral Contract Differ/i)).toBeInTheDocument();
 
     const simplifyTabBtn = screen.getByRole('tab', { name: /Plain English/i });
     fireEvent.click(simplifyTabBtn);
-    expect(screen.getByText(/Plain English Legal Translator/i)).toBeInTheDocument();
+    expect(screen.getByText(/Plain English/i, { selector: 'h1' })).toBeInTheDocument();
 
     const qaTabBtn = screen.getByRole('tab', { name: /Ask & Verify/i });
     fireEvent.click(qaTabBtn);
-    expect(screen.getByText(/Interactive Document Q&A & Citation Verifier/i)).toBeInTheDocument();
+    expect(screen.getByText(/Document Interrogation/i)).toBeInTheDocument();
   });
 
   it('contains accessible legal disclaimer in the footer', () => {
     render(<App />);
     const disclaimer = screen.getByRole('note', { name: /Legal Disclaimer/i });
     expect(disclaimer).toBeInTheDocument();
-    expect(disclaimer).toHaveTextContent(/LegalLens does not provide legal advice/i);
+    expect(disclaimer).toHaveTextContent(/does not provide.*legal advice/i);
   });
 });

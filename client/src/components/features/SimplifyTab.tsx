@@ -64,55 +64,81 @@ export const SimplifyTab: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col gap-8 animate-fade-in" style={{ padding: '2rem 0' }}>
+    <div className="flex flex-col gap-10 animate-fade-in" style={{ padding: '2.5rem 0' }}>
       
-      {/* Header */}
-      <div className="flex flex-col gap-2">
-        <h1 style={{ letterSpacing: '-0.02em' }}>
-          Plain English Legal Translator
+      {/* Italian Editorial Header */}
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center gap-2">
+          <span style={{ fontSize: '0.75rem', letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 800, color: 'var(--accent-gold)' }}>
+            ACCESSIBLE PLAIN LANGUAGE TRANSLATOR
+          </span>
+          <span style={{ color: 'var(--border-subtle)' }}>/</span>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>COLLEZIONE MILANO</span>
+        </div>
+
+        <h1 style={{ letterSpacing: '-0.03em', fontSize: 'clamp(2.4rem, 4.5vw, 3.2rem)' }}>
+          Plain English <span className="font-editorial" style={{ fontWeight: 400, color: 'var(--accent-gold)' }}>Legal Demystifier</span>
         </h1>
-        <p style={{ fontSize: '1.05rem', maxWidth: '800px' }}>
-          Demystify convoluted legalese, Latin phrases, and endless run-on sentences. Translate dense clauses into crystal-clear everyday English with readability scoring and jargon busting.
+
+        <p style={{ fontSize: '1.1rem', maxWidth: '820px', color: 'var(--text-secondary)', lineHeight: 1.65 }}>
+          Translates impenetrable legalese, Latin expressions, and endless sentences into crystal-clear 8th-grade English. Unmasks stealth traps and provides an instant Jargon Buster glossary.
         </p>
       </div>
 
-      {/* Preset Snippets */}
+      {/* 3D Curated Samples */}
       {!result && (
-        <div className="glass-panel" style={{ padding: '1.25rem' }}>
-          <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            Try a Complex Legalese Sample
+        <div className="flex flex-col gap-3">
+          <span style={{ fontSize: '0.825rem', fontWeight: 800, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+            Try a Complex Legalese Sample (1-Click Test)
           </span>
-          <div className="grid grid-cols-3 gap-3" style={{ marginTop: '0.75rem' }}>
+          <div className="grid grid-cols-3 gap-4">
             {SAMPLE_LEGALESE_SNIPPETS.map((s, idx) => (
-              <button
+              <div
                 key={idx}
                 onClick={() => handleSelectSnippet(s)}
-                className="btn btn-secondary card-interactive"
+                className="glass-panel card-interactive"
                 style={{
-                  textAlign: 'left',
+                  padding: '1.5rem',
                   display: 'flex',
                   flexDirection: 'column',
-                  alignItems: 'flex-start',
-                  padding: '0.85rem',
-                  height: 'auto',
+                  justifyContent: 'space-between',
+                  minHeight: '140px',
                 }}
               >
-                <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)' }}>{s.title}</span>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '4px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                  {s.text}
-                </span>
-              </button>
+                <div>
+                  <h3 style={{ fontSize: '1.05rem', margin: '0 0 0.4rem 0', color: 'var(--text-primary)' }}>
+                    {s.title}
+                  </h3>
+                  <p style={{
+                    fontSize: '0.825rem',
+                    color: 'var(--text-secondary)',
+                    margin: 0,
+                    display: '-webkit-box',
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: 'vertical',
+                    overflow: 'hidden',
+                    lineHeight: 1.5,
+                  }}>
+                    {s.text}
+                  </p>
+                </div>
+                
+                <div className="flex items-center gap-1" style={{ marginTop: '1rem', color: 'var(--accent-gold)', fontSize: '0.8rem', fontWeight: 700 }}>
+                  <span>Translate Snippet</span>
+                  <ArrowRight size={14} />
+                </div>
+              </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Input Panel */}
-      <div className="glass-panel" style={{ padding: '1.5rem' }}>
-        <div style={{ marginBottom: '1rem' }}>
+      {/* 3D Inset Input Panel */}
+      <div className="glass-panel" style={{ padding: '2rem' }}>
+        <div style={{ marginBottom: '1.25rem' }}>
           <label htmlFor="simplify-input-text" className="form-label flex items-center justify-between">
-            <span>Paste Confusing Legal Clause or Paragraph</span>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+            <span>Paste Confusing Legal Clause or Agreement Excerpt</span>
+            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
               {inputText.length.toLocaleString()} characters
             </span>
           </label>
@@ -120,7 +146,7 @@ export const SimplifyTab: React.FC = () => {
             id="simplify-input-text"
             rows={6}
             className="textarea-custom"
-            placeholder="Paste confusing legalese here (e.g., 'Notwithstanding anything herein to the contrary, the receiving party agrees to unconditionally indemnify...')"
+            placeholder="Paste confusing legalese here (e.g., 'Notwithstanding anything herein to the contrary, the receiving party shall unconditionally indemnify and hold harmless...')"
             value={inputText}
             onChange={e => setInputText(e.target.value)}
           />
@@ -130,19 +156,20 @@ export const SimplifyTab: React.FC = () => {
           <div
             role="alert"
             style={{
-              padding: '0.85rem',
+              padding: '1rem',
               borderRadius: 'var(--radius-sm)',
               background: 'var(--risk-critical-bg)',
-              border: '1px solid var(--risk-critical-border)',
-              color: '#f87171',
+              border: '1.5px solid var(--risk-critical-border)',
+              color: 'var(--risk-critical)',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.5rem',
-              fontSize: '0.875rem',
+              gap: '0.75rem',
+              fontSize: '0.9rem',
+              fontWeight: 600,
               marginBottom: '1rem',
             }}
           >
-            <AlertCircle size={18} />
+            <AlertCircle size={20} />
             <span>{error}</span>
           </div>
         )}
@@ -151,7 +178,7 @@ export const SimplifyTab: React.FC = () => {
           {inputText && (
             <button
               onClick={() => { setInputText(''); setResult(null); setError(null); }}
-              className="btn btn-secondary"
+              className="btn btn-outline"
             >
               <RotateCcw size={15} />
               <span>Clear</span>
@@ -163,16 +190,16 @@ export const SimplifyTab: React.FC = () => {
             onClick={() => handleSimplify()}
             disabled={loading || !inputText.trim()}
             className="btn btn-primary"
-            style={{ padding: '0.75rem 1.75rem', fontSize: '1rem', marginLeft: 'auto' }}
+            style={{ padding: '0.85rem 2.25rem', fontSize: '1rem', marginLeft: 'auto' }}
           >
             {loading ? (
               <>
                 <Sparkles className="animate-spin" size={18} />
-                <span>Translating to Plain English...</span>
+                <span>Demystifying Legalese...</span>
               </>
             ) : (
               <>
-                <BookOpen size={18} />
+                <BookOpen size={18} color="#dfb15b" />
                 <span>Translate to Plain English</span>
               </>
             )}
@@ -184,40 +211,46 @@ export const SimplifyTab: React.FC = () => {
       {result && (
         <div className="flex flex-col gap-8 animate-fade-in">
           
-          {/* Readability & Time Bar */}
-          <div className="grid grid-cols-3 gap-4">
+          {/* Readability Benchmarking Bar */}
+          <div className="grid grid-cols-3 gap-6">
             
-            <div className="glass-panel flex items-center gap-4" style={{ padding: '1.25rem' }}>
-              <div style={{ padding: '0.75rem', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.15)' }}>
-                <GraduationCap size={24} color="#f87171" />
+            <div className="glass-panel flex items-center gap-4" style={{ padding: '1.5rem' }}>
+              <div style={{ padding: '0.85rem', borderRadius: '14px', background: 'var(--risk-critical-bg)', border: '1px solid var(--risk-critical-border)' }}>
+                <GraduationCap size={26} color="var(--risk-critical)" />
               </div>
               <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Before (Legalese)</span>
-                <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#f87171' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 800 }}>
+                  Before (Legalese)
+                </span>
+                <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--risk-critical)', marginTop: '2px' }}>
                   {result.readingGradeBefore}
                 </div>
               </div>
             </div>
 
-            <div className="glass-panel flex items-center gap-4" style={{ padding: '1.25rem' }}>
-              <div style={{ padding: '0.75rem', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.15)' }}>
-                <GraduationCap size={24} color="#34d399" />
+            <div className="glass-panel flex items-center gap-4" style={{ padding: '1.5rem' }}>
+              <div style={{ padding: '0.85rem', borderRadius: '14px', background: 'var(--risk-low-bg)', border: '1px solid var(--risk-low-border)' }}>
+                <GraduationCap size={26} color="var(--risk-low)" />
               </div>
               <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>After (LegalLens)</span>
-                <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#34d399' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 800 }}>
+                  After (LegalLens)
+                </span>
+                <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--risk-low)', marginTop: '2px' }}>
                   {result.readingGradeAfter}
                 </div>
               </div>
             </div>
 
-            <div className="glass-panel flex items-center gap-4" style={{ padding: '1.25rem' }}>
-              <div style={{ padding: '0.75rem', borderRadius: '12px', background: 'rgba(59, 130, 246, 0.15)' }}>
-                <Clock size={24} color="#60a5fa" />
+            <div className="glass-panel flex items-center gap-4" style={{ padding: '1.5rem' }}>
+              <div style={{ padding: '0.85rem', borderRadius: '14px', background: 'var(--bg-tertiary)', border: '1px solid var(--border-subtle)' }}>
+                <Clock size={26} color="var(--accent-gold)" />
               </div>
               <div>
-                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Reading Time</span>
-                <div style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--text-primary)' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 800 }}>
+                  Estimated Reading Time
+                </span>
+                <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-primary)', marginTop: '2px' }}>
                   ~{result.readingTimeMinutes} minute{result.readingTimeMinutes > 1 ? 's' : ''}
                 </div>
               </div>
@@ -225,27 +258,28 @@ export const SimplifyTab: React.FC = () => {
 
           </div>
 
-          {/* Hidden Traps Warning Banner */}
+          {/* Hidden Traps Alert Box */}
           {result.hiddenTraps.length > 0 && (
             <div
               style={{
-                padding: '1.25rem',
+                padding: '1.5rem',
                 borderRadius: 'var(--radius-md)',
-                background: 'rgba(239, 68, 68, 0.08)',
-                border: '1px solid rgba(239, 68, 68, 0.3)',
+                background: 'var(--risk-critical-bg)',
+                border: '1.5px solid var(--risk-critical-border)',
                 display: 'flex',
-                gap: '1rem',
+                gap: '1.25rem',
                 alignItems: 'flex-start',
+                boxShadow: 'var(--shadow-3d-white)',
               }}
             >
-              <Flame size={22} color="#ef4444" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <Flame size={26} color="var(--risk-critical)" style={{ flexShrink: 0, marginTop: '2px' }} />
               <div>
-                <h3 style={{ fontSize: '1rem', color: '#f87171', margin: '0 0 0.5rem 0' }}>
-                  Hidden Traps & Gotchas Uncovered
+                <h3 style={{ fontSize: '1.15rem', color: 'var(--risk-critical)', margin: '0 0 0.5rem 0' }}>
+                  Covert Gotchas & Hidden Traps Unmasked
                 </h3>
-                <ul style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                <ul style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                   {result.hiddenTraps.map((trap, idx) => (
-                    <li key={idx} style={{ fontSize: '0.875rem', color: 'var(--text-primary)' }}>
+                    <li key={idx} style={{ fontSize: '0.925rem', color: 'var(--text-primary)', lineHeight: 1.5 }}>
                       {trap}
                     </li>
                   ))}
@@ -255,43 +289,45 @@ export const SimplifyTab: React.FC = () => {
           )}
 
           {/* Side-by-Side: Original vs Simplified */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-6">
             
-            <div className="glass-panel" style={{ padding: '1.5rem' }}>
-              <h3 style={{ fontSize: '1rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
-                Original Legal Phrasing
+            <div className="glass-panel" style={{ padding: '2rem' }}>
+              <h3 style={{ fontSize: '1.1rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
+                Original Dense Phrasing
               </h3>
               <div style={{
                 fontFamily: 'var(--font-mono)',
-                fontSize: '0.85rem',
-                lineHeight: 1.6,
+                fontSize: '0.875rem',
+                lineHeight: 1.65,
                 color: 'var(--text-secondary)',
                 whiteSpace: 'pre-wrap',
-                background: 'rgba(0, 0, 0, 0.25)',
-                padding: '1rem',
+                background: 'var(--bg-tertiary)',
+                padding: '1.25rem',
                 borderRadius: 'var(--radius-sm)',
-                border: '1px solid var(--border-subtle)'
+                border: '1px solid var(--border-subtle)',
+                boxShadow: 'var(--shadow-inset)',
               }}>
                 {result.originalText}
               </div>
             </div>
 
-            <div className="glass-panel" style={{ padding: '1.5rem', border: '1px solid rgba(59, 130, 246, 0.3)' }}>
-              <div className="flex items-center gap-2" style={{ marginBottom: '0.75rem' }}>
-                <Sparkles size={18} color="#3b82f6" />
-                <h3 style={{ fontSize: '1rem', color: '#60a5fa', margin: 0 }}>
-                  Everyday Plain English Translation
+            <div className="glass-panel" style={{ padding: '2rem', border: '1.5px solid rgba(184, 134, 11, 0.35)' }}>
+              <div className="flex items-center gap-2" style={{ marginBottom: '1rem' }}>
+                <Sparkles size={20} color="var(--accent-gold)" />
+                <h3 style={{ fontSize: '1.1rem', color: 'var(--accent-gold)', margin: 0 }}>
+                  Plain English Translation
                 </h3>
               </div>
               <div style={{
-                fontSize: '0.95rem',
-                lineHeight: 1.65,
+                fontSize: '1rem',
+                lineHeight: 1.7,
                 color: 'var(--text-primary)',
                 whiteSpace: 'pre-wrap',
-                background: 'rgba(59, 130, 246, 0.05)',
-                padding: '1rem',
+                background: 'var(--bg-secondary)',
+                padding: '1.25rem',
                 borderRadius: 'var(--radius-sm)',
-                border: '1px solid rgba(59, 130, 246, 0.15)'
+                border: '1px solid var(--border-subtle)',
+                boxShadow: 'var(--shadow-inset)',
               }}>
                 {result.simplifiedText}
               </div>
@@ -300,29 +336,30 @@ export const SimplifyTab: React.FC = () => {
           </div>
 
           {/* Key Takeaways & Jargon Buster */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-6">
             
             {/* Takeaways */}
-            <div className="glass-panel" style={{ padding: '1.5rem' }}>
-              <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>
+            <div className="glass-panel" style={{ padding: '2rem' }}>
+              <h3 style={{ fontSize: '1.2rem', marginBottom: '1.25rem' }}>
                 Bottom-Line Takeaways
               </h3>
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-3">
                 {result.keyTakeaways.map((takeaway, idx) => (
                   <div
                     key={idx}
                     style={{
-                      padding: '0.75rem',
+                      padding: '1rem',
                       borderRadius: 'var(--radius-sm)',
-                      background: 'rgba(255, 255, 255, 0.02)',
+                      background: 'var(--bg-secondary)',
                       border: '1px solid var(--border-subtle)',
+                      boxShadow: 'var(--shadow-inset)',
                       display: 'flex',
                       alignItems: 'flex-start',
-                      gap: '0.5rem',
-                      fontSize: '0.875rem',
+                      gap: '0.75rem',
+                      fontSize: '0.925rem',
                     }}
                   >
-                    <ArrowRight size={15} color="#3b82f6" style={{ marginTop: '2px', flexShrink: 0 }} />
+                    <ArrowRight size={16} color="var(--accent-gold)" style={{ marginTop: '3px', flexShrink: 0 }} />
                     <span>{takeaway}</span>
                   </div>
                 ))}
@@ -330,10 +367,10 @@ export const SimplifyTab: React.FC = () => {
             </div>
 
             {/* Jargon Glossary */}
-            <div className="glass-panel" style={{ padding: '1.5rem' }}>
-              <div className="flex items-center gap-2" style={{ marginBottom: '1rem' }}>
-                <HelpCircle size={18} color="#f59e0b" />
-                <h3 style={{ fontSize: '1.1rem', margin: 0 }}>
+            <div className="glass-panel" style={{ padding: '2rem' }}>
+              <div className="flex items-center gap-2" style={{ marginBottom: '1.25rem' }}>
+                <HelpCircle size={20} color="var(--accent-gold)" />
+                <h3 style={{ fontSize: '1.2rem', margin: 0 }}>
                   Jargon Buster Glossary ({result.jargonGlossary.length})
                 </h3>
               </div>
@@ -342,19 +379,20 @@ export const SimplifyTab: React.FC = () => {
                   <div
                     key={idx}
                     style={{
-                      padding: '0.85rem',
+                      padding: '1rem',
                       borderRadius: 'var(--radius-sm)',
-                      background: 'rgba(245, 158, 11, 0.04)',
-                      border: '1px solid rgba(245, 158, 11, 0.2)',
+                      background: '#ffffff',
+                      border: '1px solid var(--border-subtle)',
+                      boxShadow: 'var(--shadow-3d-white)',
                     }}
                   >
-                    <div style={{ fontWeight: 700, fontSize: '0.9rem', color: '#fbbf24' }}>
+                    <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'var(--accent-gold)' }}>
                       {term.term}
                     </div>
-                    <p style={{ fontSize: '0.825rem', color: 'var(--text-primary)', margin: '4px 0' }}>
+                    <p style={{ fontSize: '0.875rem', color: 'var(--text-primary)', margin: '4px 0', lineHeight: 1.5 }}>
                       <strong>Meaning:</strong> {term.plainMeaning}
                     </p>
-                    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0 }}>
+                    <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', margin: 0 }}>
                       <strong>Why it matters:</strong> {term.whyItMatters}
                     </p>
                   </div>
