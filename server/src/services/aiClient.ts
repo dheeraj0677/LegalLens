@@ -50,6 +50,11 @@ class AIClientService {
     userPrompt: string,
     fallbackGenerator: () => T
   ): Promise<T> {
+    // In test environment, use deterministic domain engine to ensure fast, isolated tests
+    if (process.env.NODE_ENV === 'test') {
+      return fallbackGenerator();
+    }
+
     if (!this.client && this.hasActiveKey()) {
       this.initClient();
     }
