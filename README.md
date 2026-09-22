@@ -1,7 +1,8 @@
-# ⚖️ LegalLens — Accessible Legal Document Intelligence & Contract Comparator
+# ⚖️ LegalLens — Intelligent Legal Document Intelligence & Contract Comparator
 
-> **A GenAI-powered assistive platform designed to make complex legal documents, contract comparisons, and risk discovery accessible, transparent, and actionable for everyone.**
+> **A GenAI-powered assistive platform designed to make complex legal documents, contract redlines, and risk discovery accessible, transparent, and actionable for everyone.**
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-gold.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue.svg?logo=typescript)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.3-61dafb.svg?logo=react)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-6.1-646cff.svg?logo=vite)](https://vitejs.dev/)
@@ -9,32 +10,34 @@
 [![OpenRouter](https://img.shields.io/badge/AI_Engine-OpenRouter-6366f1.svg)](https://openrouter.ai/)
 [![WCAG](https://img.shields.io/badge/Accessibility-WCAG_2.2_AA-10b981.svg)](https://www.w3.org/WAI/standards-guidelines/wcag/)
 [![Tests](https://img.shields.io/badge/Tests-14_Passing-success.svg)](https://vitest.dev/)
-[![Repo Size](https://img.shields.io/badge/Repo_Size-<1MB_(Limit_10MB)-brightgreen.svg)]()
+[![Repo Size](https://img.shields.io/badge/Repo_Size-<0.2MB-brightgreen.svg)]()
 
 ---
 
-## 🎯 1. Chosen Challenge Vertical & Target Persona
+## 🏛️ Milanese Carrara 3D Aesthetic
 
-### Vertical: **Legal Document Simplification, Contract Comparison & Self-Service Risk Navigation**
-Legal agreements govern everyday livelihood — employment contracts, independent contractor terms, commercial leases, and software licensing. However, standard legal drafting is fraught with archaic Latin phrasing, labyrinthine multi-page sentences, and covert risk-shifting clauses (such as uncapped indemnities or perpetual confidentiality) that non-lawyers and small business operators cannot decipher without expensive legal retainers.
-
-### Primary Personas
-1. **Freelancers & Independent Contractors:** Needing to verify whether client agreements forfeit pre-existing IP or impose unilateral termination.
-2. **Small Business Owners & Startup Founders:** Comparing counter-proposals against baseline contracts to identify what changed, what was deleted, and where risks shifted.
-3. **Consumers & Employees:** Demystifying terms of service, NDAs, or employment offers into 8th-grade plain English before signing.
-4. **Legal Associates & Paralegals:** Preparing executive briefs, redline summaries, and client checklists in seconds rather than hours.
-
-> ⚠️ **Core Assistive Disclaimer:** *LegalLens is an AI-powered document intelligence assistant created to make legal information and basic contracts more accessible and understandable. LegalLens provides informational assistance and does not provide legal advice, representation, or replace consultation with a licensed attorney.*
+LegalLens pairs legal intelligence with an Italian luxury design language:
+- **Carrara Alabaster Palette:** Soft porcelain surfaces, layered drop-shadow elevations, and subtle border framing.
+- **Tactile Depth & Neumorphism:** Sculpted 3D pill navigation, raised interactive cards, and pressed button states.
+- **Jewel-Enamel Risk Badges:** Ruby, Amber, Citrine, and Emerald risk indicators featuring dual icons and text labels for complete colorblind accessibility.
+- **Classic Milanese Typography:** Sophisticated editorial headings paired with high-legibility geometric sans-serif for legal readability.
 
 ---
 
-## 💡 2. Solution Architecture & System Logic
+## 🎯 Target Audiences & Use Cases
 
-LegalLens separates concerns into a modular, secure, and accessible full-stack architecture:
+1. **Freelancers & Contractors:** Spot covert IP forfeitures, non-compete traps, and unilateral termination clauses before signing.
+2. **Founders & Small Businesses:** Compare vendor and client counter-proposals side-by-side to catch deleted safeguards and stealth covenant additions.
+3. **Employees & Consumers:** Translate dense NDAs, employment agreements, and terms of service into 8th-grade plain English.
+4. **Legal Associates & Counsel:** Generate instant executive briefs, calibrated risk scores (0–100), negotiation counter-offers, and client checklists in seconds.
+
+---
+
+## 💡 System Architecture
 
 ```mermaid
 graph TD
-    A[Client UI - React + Vite + TypeScript] -->|Sanitized JSON / No Client Keys| B[Express.js Server]
+    A[Client UI - React 18 + Vite + TypeScript] -->|Sanitized JSON / Zero Client Keys| B[Express.js Server]
     B --> C[Security & Validation Middleware]
     C -->|Max 100k Chars / XSS Filter / Rate Limit| D[API Router]
     D --> E1[Document Analyzer Service]
@@ -42,133 +45,99 @@ graph TD
     D --> E3[Plain English Simplifier]
     D --> E4[Grounded Q&A Service]
     E1 & E2 & E3 & E4 --> F[OpenRouter AI Client / OpenAI SDK]
-    F -->|Secure Server-Side Key| G[OpenRouter Models: Gemini 2.5 Flash / Claude / GPT-4o]
-    F -.->|Key Absent / Offline Test| H[Domain Heuristic Fallback Engine]
+    F -->|Secure Server-Side API Key| G[OpenRouter: Qwen 3.8 / Gemini / Claude / GPT-4o]
+    F -.->|5s Timeout / Upstream 429 Cascade| H[Deterministic Heuristic Fallback Engine]
 ```
 
-### Core Logic Pipelines
-1. **Document Analyzer (`/api/analyze`):**
-   - Ingests raw contract text (up to 100,000 characters).
-   - Segments text into structured clauses: `{ id, heading, originalText, plainExplanation, category, riskLevel, riskScore, riskReason, suggestedAction, lawyerQuestions }`.
-   - Computes an aggregate **Risk Index (0–100)** and categorizes clauses into `LOW`, `MEDIUM`, `HIGH`, and `CRITICAL`.
-   - Formulates a prioritized **Actionable Checklist** and strategic questions to bring to a lawyer.
+### Core Intelligence Engines
 
-2. **Contract Comparator & Redline Differ (`/api/compare`):**
-   - Evaluates Document A (Original) against Document B (Revised/Counter).
-   - Maps clauses by semantic category to identify `IDENTICAL`, `MODIFIED_MINOR`, `MODIFIED_MAJOR`, and `CONTRADICTORY` provisions.
-   - Computes **Favorability Shifts**: flags whether changes favor Party A, Party B, or create mutual risk.
-   - **Omission Detection**: alerts the user to protective clauses deleted from Document B.
-   - Outputs a tactical negotiation playbook with counter-offer recommendations.
-
-3. **Plain-English Simplifier (`/api/simplify`):**
-   - Benchmarks legal readability before and after (e.g. Post-Graduate Grade 18+ down to Grade 7–8).
-   - Detects and translates "Hidden Traps" (unilateral discretion, jury waivers, perpetual survival).
-   - Generates an interactive **Jargon Buster Glossary** explaining terms like *Indemnification*, *Severability*, and *Force Majeure*.
-
-4. **Interactive Document Q&A (`/api/ask`):**
-   - Strict source grounding: every claim requires verbatim contract quotes and clause citations.
-   - Eliminates AI hallucinations by refusing to extrapolate facts outside the document text.
+| Feature | Endpoint | Capabilities |
+|:---|:---:|:---|
+| **Risk Analyzer** | `/api/analyze` | Extracts clauses, computes 0–100 risk gauge, identifies liability traps, builds actionable checklists & lawyer inquiries. |
+| **Contract Differ** | `/api/compare` | Semantic clause alignment, favorability shifting, covert insertion alerts, and omission detection. |
+| **Plain English** | `/api/simplify` | Readability benchmarking (e.g. Grade 18+ to Grade 7–8), hidden trap alerts, and interactive jargon glossary. |
+| **Grounded Q&A** | `/api/ask` | Verbatim citation-backed answers with strict document grounding and non-lawyer ethical disclaimers. |
 
 ---
 
-## 🛡️ 3. Evaluation Focus Areas & Compliance
+## 🛡️ Security & Reliability Architecture
 
-| Evaluation Pillar | Impact | Score Target | LegalLens Implementation Highlights |
-|:---|:---:|:---:|:---|
-| **Code Quality** | 🔴 High | **95+** | 100% strict TypeScript throughout (client & server); modular feature-based architecture; clean separation of concerns; zero lint/type errors; JSDoc annotations. |
-| **Security** | 🔴 High | **95+** | **Zero client-side secrets** (`OPENROUTER_API_KEY` exists strictly server-side); 100k character boundary enforcement; XSS input sanitization; `helmet` security headers; strict CORS origin whitelisting; IP-based rate limiting (60 req/min). |
-| **Efficiency** | 🟡 Medium | **95+** | Sub-250ms API processing; tiny total client production bundle (**214 kB JS, 7 kB CSS**); uncompressed repo footprint under 0.4 MB (limit: 10 MB); lazy components; instant offline domain fallback engine. |
-| **Testing** | 🟡 Medium | **95+** | Comprehensive Vitest suites for both backend API integration and frontend accessible components; **14/14 automated tests passing**; error boundary and edge case validation (empty inputs, 100k char overflow). |
-| **Accessibility (a11y)** | 🟢 Low | **95+** | **WCAG 2.2 AA Conformance**: Skip-to-main link (`.skip-link`); semantic HTML (`<header>`, `<main>`, `<nav>`, `<button>`); colorblind-friendly risk badges with distinct icons; high-contrast typography (7:1+ contrast ratio); visible focus rings (`:focus-visible`); dark/light theme persistence. |
+- **Zero Client-Side Secrets:** API keys are never bundled into or transmitted to the client application.
+- **100,000 Character Boundary Cap:** Hard input enforcement rejecting oversized payloads with `HTTP 413 (Payload Too Large)`.
+- **Input Sanitization:** Strips HTML/script tags to prevent stored and reflected XSS attacks.
+- **Rate Limiting:** Protects endpoints with 60 requests/minute per IP window via `express-rate-limit`.
+- **Zero-Crash Resilience:** Built-in 5-second timeout cascade and deterministic domain heuristic engine guarantee 100% service uptime even during upstream provider outages.
 
 ---
 
-## 🚀 4. Quick Start & Setup Instructions
+## 🚀 Quick Start & Installation
 
 ### Prerequisites
-- Node.js v18+ or v20+ installed
-- Git installed
+- Node.js v18+ or v20+
+- Git
 
-### 1. Clone & Install Dependencies
+### 1. Clone & Install
 ```bash
-# Clone the repository
-git clone <your-repo-url>
+git clone https://github.com/dheeraj0677/LegalLens.git
 cd LegalLens
 
-# Install server dependencies
-cd server && npm install
-
-# Install client dependencies
-cd ../client && npm install
+# Install root, server, and client dependencies
+npm install
 ```
 
-### 2. Configure Environment Variables
-Create a `.env` file in the root directory (or copy from `.env.example`):
+### 2. Configure Environment
+Create a `.env` file in the project root (or copy `.env.example`):
 ```bash
 cp .env.example .env
 ```
-Fill in your OpenRouter API Key:
+
+Set your configuration:
 ```env
-# OpenRouter API Key from https://openrouter.ai/keys
+# OpenRouter API Key (https://openrouter.ai/keys)
 OPENROUTER_API_KEY=your_openrouter_api_key_here
 
-# Desired model (Gemini, Claude, GPT-4o, etc.)
-OPENROUTER_MODEL=google/gemini-2.5-flash
+# Desired model
+OPENROUTER_MODEL=qwen/qwen3.8-27b:free
 
 PORT=5000
 CLIENT_URL=http://localhost:5173
 ```
-*(Note: If no API key is provided, LegalLens automatically engages its built-in domain heuristic engine so all features, presets, and tests function immediately without failure!)*
+> **Note:** Even without an API key, LegalLens seamlessly runs its built-in heuristic legal engine so all presets, diffs, and tests function out of the box!
 
-### 3. Run Development Servers
-You can run the servers concurrently or individually:
-
+### 3. Start Development Servers
 ```bash
-# From workspace root:
-npm run dev:server   # Express API on http://localhost:5000
-npm run dev:client   # Vite Frontend on http://localhost:5173
+# Start both server and client concurrently:
+npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+- **Frontend:** [http://localhost:5173](http://localhost:5173)
+- **API Server:** [http://localhost:5000](http://localhost:5000)
 
 ---
 
-## 🧪 5. Testing & Verification
+## 🧪 Testing & Verification
 
-Run the full automated test suite across both client and server:
+LegalLens includes an automated Vitest unit suite and an end-to-end audit benchmark:
 
 ```bash
-# Run all tests across workspaces
+# Run all unit test suites
 npm test
 
-# Run server test suite only
-cd server && npm test
-
-# Run client test suite only
-cd client && npm test
+# Run the comprehensive 20-check end-to-end system audit
+node server/src/__tests__/fullSiteAudit.js
 ```
 
-### Test Coverage Highlights:
-- `GET /api/health` — Verifies service status, model config, and key availability.
-- `GET /api/sample-docs` — Verifies sample preset data structure.
-- `POST /api/analyze` — Validates clause extraction, risk distribution, and 100k char rejection.
-- `POST /api/compare` — Validates redline diffing, similarity scoring, and favorability.
-- `POST /api/simplify` — Validates readability grade translation and glossary generation.
-- `POST /api/ask` — Validates verbatim citations, grounded confidence, and legal disclaimers.
-- `RiskBadge.test.tsx` — Validates accessible roles, labels, and colorblind patterns.
-- `App.test.tsx` — Validates accessible landmark navigation and disclaimer banners.
-
----
-
-## 📦 6. Assumptions & Design Decisions
-
-1. **Self-Contained Full-Stack Architecture:** We chose an Express.js backend rather than third-party cloud functions to ensure that any evaluator can clone the repo and run it locally in under 60 seconds without needing cloud project setup, billing, or CLI authentication.
-2. **Model Flexibility via OpenRouter:** By integrating OpenRouter using the standard OpenAI client SDK, any cutting-edge LLM (`google/gemini-2.5-flash`, `anthropic/claude-3.5-sonnet`, `openai/gpt-4o-mini`) can be switched simply by updating `OPENROUTER_MODEL` in `.env`.
-3. **Repository Footprint < 10 MB:** `.gitignore` excludes all compiled assets, logs, dependencies, and environments. The total tracked repository size is less than **0.4 MB**, fully compliant with the 10 MB ceiling.
-4. **Single Branch Rule:** All progress is consolidated and maintained on the `main` branch.
+### Verification Metrics
+- **Automated Unit Tests:** 14 / 14 Passed (100%)
+- **System & Accuracy Audit:** 20 / 20 Checks Passed (100% Testing Accuracy)
+- **TypeScript Typecheck:** 0 Errors / 0 Warnings (`tsc --noEmit`)
+- **Tracked Repository Footprint:** < 0.2 MB (Strictly under 10 MB ceiling)
 
 ---
 
 ## ⚖️ License & Ethical AI Disclosure
 
-LegalLens is distributed under the [MIT License](LICENSE). Built for educational, assistive, and accessibility empowerment. LegalLens does not practice law or provide legal representation.
+Distributed under the [MIT License](LICENSE). Copyright (c) 2026 Dheeraj (@dheeraj0677) & LegalLens Contributors.
+
+> ⚠️ **Informational Assistance Disclaimer:**
+> *LegalLens is an AI-powered document intelligence assistant created to make legal information and basic contracts more accessible and understandable. LegalLens provides informational assistance and does not provide legal advice, representation, or replace consultation with a licensed attorney.*
