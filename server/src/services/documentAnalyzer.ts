@@ -73,10 +73,32 @@ Return a JSON object with this exact shape:
    * Extracts real paragraphs/sections and applies legal heuristics.
    */
   public generateDomainFallbackAnalysis(text: string, title: string): DocumentAnalysisResult {
-    const rawParagraphs = text
-      .split(/\n\s*\n|\n(?=[0-9]+\.|\b[A-Z\s]{4,}\b)/g)
-      .map(p => p.trim())
-      .filter(p => p.length > 25);
+    // Linear O(n) single-pass paragraph extraction avoiding regular expression backtracking
+    const rawParagraphs: string[] = [];
+    const lines = text.split(/\r?\n/);
+    let currentParagraph: string[] = [];
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      const isHeader = /^[0-9]+(\.[0-9]+)*\.\s+[A-Z]|^[A-Z\s]{4,}:?$/.test(trimmed);
+
+      if ((trimmed.length === 0 || isHeader) && currentParagraph.length > 0) {
+        const paragraphText = currentParagraph.join(' ').trim();
+        if (paragraphText.length > 25) {
+          rawParagraphs.push(paragraphText);
+        }
+        currentParagraph = [];
+      }
+      if (trimmed.length > 0) {
+        currentParagraph.push(trimmed);
+      }
+    }
+    if (currentParagraph.length > 0) {
+      const remaining = currentParagraph.join(' ').trim();
+      if (remaining.length > 25) {
+        rawParagraphs.push(remaining);
+      }
+    }
 
     const clauses: Clause[] = [];
     const counts = { low: 0, medium: 0, high: 0, critical: 0 };

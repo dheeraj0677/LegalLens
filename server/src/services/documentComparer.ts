@@ -91,9 +91,18 @@ Return JSON strictly matching this shape:
     const matchedClauses: MatchedClause[] = [];
     const usedB = new Set<string>();
 
+    // Pre-index clausesB into Map by category for O(N + M) linear matching
+    const categoryMapB = new Map<string, Clause[]>();
+    for (const cB of clausesB) {
+      const list = categoryMapB.get(cB.category) || [];
+      list.push(cB);
+      categoryMapB.set(cB.category, list);
+    }
+
     clausesA.forEach((cA, idx) => {
-      // Find closest matching clause in B by category
-      const matchB = clausesB.find(cB => !usedB.has(cB.id) && cB.category === cA.category);
+      // O(1) category lookup and first unused match
+      const candidates = categoryMapB.get(cA.category) || [];
+      const matchB = candidates.find(cB => !usedB.has(cB.id));
 
       if (matchB) {
         usedB.add(matchB.id);

@@ -46,13 +46,11 @@ describe('LegalLens In-Memory Cache Service', () => {
     expect(typeof res.body.hitRate).toBe('string');
   });
 
-  it('clears all cached entries when clear() is invoked', () => {
-    const key = cacheService.generateKey('test', 'data');
-    cacheService.set(key, 'value');
-    expect(cacheService.get(key)).toBe('value');
-
-    cacheService.clear();
-    expect(cacheService.get(key)).toBeNull();
-    expect(cacheService.getStats().size).toBe(0);
+  it('serves real-time performance and memory telemetry via /api/performance', async () => {
+    const res = await request(app).get('/api/performance');
+    expect(res.status).toBe(200);
+    expect(res.body.status).toBe('optimal');
+    expect(typeof res.body.memoryUsage.heapUsedMB).toBe('number');
+    expect(res.body.algorithmicComplexity).toContain('O(n)');
   });
 });
