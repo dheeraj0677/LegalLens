@@ -29,5 +29,10 @@
     "wcag"
   ],
   "author": "LegalLens Team",
-  "license": "MIT"
+  "license": "MIT",
+  "allowScripts": {
+    "esbuild": true,
+    "esbuild@0.25.12": true,
+    "esbuild@0.28.2": true
+  }
 }
