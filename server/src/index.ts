@@ -79,7 +79,7 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
 });
 
 // Start Server if directly invoked
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
   const server = app.listen(config.port, () => {
     console.log(`[LegalLens Server] Ready at http://localhost:${config.port}`);
     console.log(`[LegalLens Server] Model target: ${config.openRouterModel}`);
