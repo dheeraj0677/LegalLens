@@ -4,8 +4,17 @@ import { documentComparer } from '../services/documentComparer';
 import { simplifierService } from '../services/simplifierService';
 import { qaService } from '../services/qaService';
 import { aiClient } from '../services/aiClient';
+import { cacheService } from '../services/cacheService';
 import { SAMPLE_DOCUMENTS } from '../data/sampleDocuments';
-import { validateDocumentLength, sanitizeLegalInput } from '../middleware/security';
+import {
+  validateDocumentLength,
+  sanitizeLegalInput,
+  validateBody,
+  analyzeRequestSchema,
+  compareRequestSchema,
+  simplifyRequestSchema,
+  qaRequestSchema,
+} from '../middleware/security';
 
 const router = Router();
 
@@ -22,6 +31,7 @@ router.get('/health', (_req: Request, res: Response) => {
     version: '1.0.0',
     model: aiClient.getModel(),
     hasActiveKey: aiClient.hasActiveKey(),
+    cache: cacheService.getStats(),
     timestamp: new Date().toISOString(),
   });
 });
@@ -30,10 +40,18 @@ router.get('/health', (_req: Request, res: Response) => {
  * Get Preset Sample Documents for Testing & Demos
  */
 router.get('/sample-docs', (_req: Request, res: Response) => {
+  res.set('Cache-Control', 'public, max-age=3600');
   res.json({
     count: SAMPLE_DOCUMENTS.length,
     presets: SAMPLE_DOCUMENTS,
   });
+});
+
+/**
+ * Cache Statistics Endpoint
+ */
+router.get('/cache-stats', (_req: Request, res: Response) => {
+  res.json(cacheService.getStats());
 });
 
 /**
@@ -42,19 +60,22 @@ router.get('/sample-docs', (_req: Request, res: Response) => {
 router.post(
   '/analyze',
   validateDocumentLength(['text']),
+  validateBody(analyzeRequestSchema),
   async (req: Request, res: Response): Promise<void> => {
     try {
       const { text, title } = req.body;
+      const cacheKey = cacheService.generateKey('analyze', text, title || '');
 
-      if (!text || typeof text !== 'string' || text.trim().length === 0) {
-        res.status(400).json({
-          error: 'BadRequest',
-          message: 'Document text is required and cannot be empty.',
-        });
+      const cached = cacheService.get(cacheKey);
+      if (cached) {
+        res.setHeader('X-Cache-Status', 'HIT');
+        res.json(cached);
         return;
       }
 
       const result = await documentAnalyzer.analyzeDocument(text, title);
+      cacheService.set(cacheKey, result);
+      res.setHeader('X-Cache-Status', 'MISS');
       res.json(result);
     } catch (err: any) {
       console.error('[Route /api/analyze Error]:', err);
@@ -73,19 +94,22 @@ router.post(
 router.post(
   '/compare',
   validateDocumentLength(['docA', 'docB']),
+  validateBody(compareRequestSchema),
   async (req: Request, res: Response): Promise<void> => {
     try {
       const { docA, docB, titleA, titleB } = req.body;
+      const cacheKey = cacheService.generateKey('compare', docA, docB, titleA || '', titleB || '');
 
-      if (!docA || !docB || typeof docA !== 'string' || typeof docB !== 'string') {
-        res.status(400).json({
-          error: 'BadRequest',
-          message: 'Both docA and docB are required for document comparison.',
-        });
+      const cached = cacheService.get(cacheKey);
+      if (cached) {
+        res.setHeader('X-Cache-Status', 'HIT');
+        res.json(cached);
         return;
       }
 
       const result = await documentComparer.compareDocuments(docA, docB, titleA, titleB);
+      cacheService.set(cacheKey, result);
+      res.setHeader('X-Cache-Status', 'MISS');
       res.json(result);
     } catch (err: any) {
       console.error('[Route /api/compare Error]:', err);
@@ -104,19 +128,22 @@ router.post(
 router.post(
   '/simplify',
   validateDocumentLength(['text']),
+  validateBody(simplifyRequestSchema),
   async (req: Request, res: Response): Promise<void> => {
     try {
       const { text } = req.body;
+      const cacheKey = cacheService.generateKey('simplify', text);
 
-      if (!text || typeof text !== 'string' || text.trim().length === 0) {
-        res.status(400).json({
-          error: 'BadRequest',
-          message: 'Text to simplify is required.',
-        });
+      const cached = cacheService.get(cacheKey);
+      if (cached) {
+        res.setHeader('X-Cache-Status', 'HIT');
+        res.json(cached);
         return;
       }
 
       const result = await simplifierService.simplifyText(text);
+      cacheService.set(cacheKey, result);
+      res.setHeader('X-Cache-Status', 'MISS');
       res.json(result);
     } catch (err: any) {
       console.error('[Route /api/simplify Error]:', err);
@@ -135,19 +162,22 @@ router.post(
 router.post(
   '/ask',
   validateDocumentLength(['documentText']),
+  validateBody(qaRequestSchema),
   async (req: Request, res: Response): Promise<void> => {
     try {
       const { documentText, question } = req.body;
+      const cacheKey = cacheService.generateKey('ask', documentText, question);
 
-      if (!documentText || !question || typeof documentText !== 'string' || typeof question !== 'string') {
-        res.status(400).json({
-          error: 'BadRequest',
-          message: 'Both documentText and question are required.',
-        });
+      const cached = cacheService.get(cacheKey);
+      if (cached) {
+        res.setHeader('X-Cache-Status', 'HIT');
+        res.json(cached);
         return;
       }
 
       const result = await qaService.answerQuestion(documentText, question);
+      cacheService.set(cacheKey, result);
+      res.setHeader('X-Cache-Status', 'MISS');
       res.json(result);
     } catch (err: any) {
       console.error('[Route /api/ask Error]:', err);

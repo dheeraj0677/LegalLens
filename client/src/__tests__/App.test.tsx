@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import App from '../App';
 
 // Mock global fetch for health check and sample docs
@@ -8,7 +8,7 @@ beforeEach(() => {
     if (url.includes('/health')) {
       return Promise.resolve({
         ok: true,
-        json: () => Promise.resolve({ status: 'ok', model: 'google/gemini-2.5-flash' }),
+        json: () => Promise.resolve({ status: 'ok', model: 'qwen/qwen3.8-27b:free' }),
       });
     }
     if (url.includes('/sample-docs')) {
@@ -35,9 +35,13 @@ beforeEach(() => {
 });
 
 describe('LegalLens App Shell', () => {
-  it('renders the brand title and navigation tabs', async () => {
+  it('renders the brand title and navigation tabs without warnings', async () => {
     render(<App />);
-    expect(screen.getAllByText(/Legal/i)[0]).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(screen.getAllByText(/Legal/i)[0]).toBeInTheDocument();
+    });
+
     expect(screen.getAllByText(/Lens/i)[0]).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Analyze & Risks/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /Compare Contracts/i })).toBeInTheDocument();
@@ -47,23 +51,31 @@ describe('LegalLens App Shell', () => {
 
   it('switches tabs when clicking on navigation items', async () => {
     render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByRole('tab', { name: /Compare Contracts/i })).toBeInTheDocument();
+    });
+
     const compareTabBtn = screen.getByRole('tab', { name: /Compare Contracts/i });
     fireEvent.click(compareTabBtn);
-    expect(screen.getByText(/Bilateral Contract Differ/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Bilateral Contract Differ/i)).toBeInTheDocument();
 
     const simplifyTabBtn = screen.getByRole('tab', { name: /Plain English/i });
     fireEvent.click(simplifyTabBtn);
-    expect(screen.getByText(/Plain English/i, { selector: 'h1' })).toBeInTheDocument();
+    expect(await screen.findByText(/Plain English/i, { selector: 'h1' })).toBeInTheDocument();
 
     const qaTabBtn = screen.getByRole('tab', { name: /Ask & Verify/i });
     fireEvent.click(qaTabBtn);
-    expect(screen.getByText(/Document Interrogation/i)).toBeInTheDocument();
+    expect(await screen.findByText(/Document Interrogation/i)).toBeInTheDocument();
   });
 
-  it('contains accessible legal disclaimer in the footer', () => {
+  it('contains accessible legal disclaimer in the footer', async () => {
     render(<App />);
-    const disclaimer = screen.getByRole('note', { name: /Legal Disclaimer/i });
-    expect(disclaimer).toBeInTheDocument();
-    expect(disclaimer).toHaveTextContent(/does not provide.*legal advice/i);
+
+    await waitFor(() => {
+      const disclaimer = screen.getByRole('note', { name: /Legal Disclaimer/i });
+      expect(disclaimer).toBeInTheDocument();
+      expect(disclaimer).toHaveTextContent(/does not provide.*legal advice/i);
+    });
   });
 });

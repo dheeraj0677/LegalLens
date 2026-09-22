@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import rateLimit from 'express-rate-limit';
+import { z } from 'zod';
 import { config } from '../config';
 
 /**
@@ -24,7 +25,7 @@ export const validateDocumentLength = (fields: string[] = ['text', 'documentText
 };
 
 /**
- * Basic sanitization to strip potential script tags or malicious payload sequences.
+ * Strict Input Sanitization to strip potential script tags, javascript: URIs, or malicious event handlers.
  */
 export const sanitizeLegalInput = (req: Request, _res: Response, next: NextFunction): void => {
   if (req.body && typeof req.body === 'object') {
@@ -32,11 +33,56 @@ export const sanitizeLegalInput = (req: Request, _res: Response, next: NextFunct
       if (typeof req.body[key] === 'string') {
         req.body[key] = req.body[key]
           .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-          .replace(/javascript:/gi, '');
+          .replace(/javascript:/gi, '')
+          .replace(/on\w+\s*=/gi, '');
       }
     }
   }
   next();
+};
+
+/**
+ * Zod Schemas for Strict Request Validation
+ */
+export const analyzeRequestSchema = z.object({
+  text: z.string().trim().min(1, 'Document text is required and cannot be empty.'),
+  title: z.string().max(200).optional(),
+});
+
+export const compareRequestSchema = z.object({
+  docA: z.string().trim().min(1, 'Document A (Original) is required and cannot be empty.'),
+  docB: z.string().trim().min(1, 'Document B (Revision) is required and cannot be empty.'),
+  titleA: z.string().max(200).optional(),
+  titleB: z.string().max(200).optional(),
+});
+
+export const simplifyRequestSchema = z.object({
+  text: z.string().trim().min(1, 'Legal text to simplify is required and cannot be empty.'),
+  title: z.string().max(200).optional(),
+});
+
+export const qaRequestSchema = z.object({
+  documentText: z.string().trim().min(1, 'Document text is required and cannot be empty.'),
+  question: z.string().trim().min(1, 'Question is required and cannot be empty.'),
+});
+
+/**
+ * Middleware factory for validating request bodies against Zod schemas
+ */
+export const validateBody = (schema: z.ZodSchema) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({
+        error: 'BadRequest',
+        message: parsed.error.errors[0]?.message || 'Invalid request body format.',
+        details: parsed.error.errors.map(e => ({ field: e.path.join('.'), message: e.message })),
+      });
+      return;
+    }
+    req.body = parsed.data;
+    next();
+  };
 };
 
 /**

@@ -16,6 +16,36 @@ export const Header: React.FC<HeaderProps> = ({
   toggleTheme,
   modelName,
 }) => {
+  const TABS: Array<{ id: 'analyze' | 'compare' | 'simplify' | 'qa'; label: string; icon: React.ReactNode }> = [
+    { id: 'analyze', label: 'Analyze & Risks', icon: <FileSearch size={16} strokeWidth={2.2} /> },
+    { id: 'compare', label: 'Compare Contracts', icon: <GitCompare size={16} strokeWidth={2.2} /> },
+    { id: 'simplify', label: 'Plain English', icon: <BookOpen size={16} strokeWidth={2.2} /> },
+    { id: 'qa', label: 'Ask & Verify', icon: <MessageSquareText size={16} strokeWidth={2.2} /> },
+  ];
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    const currentIndex = TABS.findIndex(t => t.id === activeTab);
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      const nextTab = TABS[(currentIndex + 1) % TABS.length].id;
+      setActiveTab(nextTab);
+      document.getElementById(`nav-tab-${nextTab}`)?.focus();
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      const prevTab = TABS[(currentIndex - 1 + TABS.length) % TABS.length].id;
+      setActiveTab(prevTab);
+      document.getElementById(`nav-tab-${prevTab}`)?.focus();
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      setActiveTab(TABS[0].id);
+      document.getElementById(`nav-tab-${TABS[0].id}`)?.focus();
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      setActiveTab(TABS[TABS.length - 1].id);
+      document.getElementById(`nav-tab-${TABS[TABS.length - 1].id}`)?.focus();
+    }
+  };
+
   return (
     <header
       style={{
@@ -102,7 +132,9 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* 3D Tactile Segmented Navigation (Italian Marble Dock) */}
         <nav
+          role="tablist"
           aria-label="Main Navigation"
+          onKeyDown={handleKeyDown}
           className="flex items-center gap-1"
           style={{
             background: 'var(--bg-tertiary)',
@@ -112,89 +144,34 @@ export const Header: React.FC<HeaderProps> = ({
             border: '1px solid var(--border-subtle)',
           }}
         >
-          <button
-            id="nav-tab-analyze"
-            onClick={() => setActiveTab('analyze')}
-            aria-selected={activeTab === 'analyze'}
-            role="tab"
-            className="btn"
-            style={{
-              padding: '0.55rem 1.15rem',
-              fontSize: '0.85rem',
-              borderRadius: '10px',
-              background: activeTab === 'analyze' ? '#ffffff' : 'transparent',
-              color: activeTab === 'analyze' ? 'var(--text-primary)' : 'var(--text-muted)',
-              boxShadow: activeTab === 'analyze' ? '0 3px 0 #ded8cd, 0 6px 14px rgba(0, 0, 0, 0.06)' : 'none',
-              border: activeTab === 'analyze' ? '1px solid var(--border-subtle)' : '1px solid transparent',
-              fontWeight: activeTab === 'analyze' ? 800 : 600,
-            }}
-          >
-            <FileSearch size={16} strokeWidth={2.2} />
-            <span>Analyze & Risks</span>
-          </button>
-
-          <button
-            id="nav-tab-compare"
-            onClick={() => setActiveTab('compare')}
-            aria-selected={activeTab === 'compare'}
-            role="tab"
-            className="btn"
-            style={{
-              padding: '0.55rem 1.15rem',
-              fontSize: '0.85rem',
-              borderRadius: '10px',
-              background: activeTab === 'compare' ? '#ffffff' : 'transparent',
-              color: activeTab === 'compare' ? 'var(--text-primary)' : 'var(--text-muted)',
-              boxShadow: activeTab === 'compare' ? '0 3px 0 #ded8cd, 0 6px 14px rgba(0, 0, 0, 0.06)' : 'none',
-              border: activeTab === 'compare' ? '1px solid var(--border-subtle)' : '1px solid transparent',
-              fontWeight: activeTab === 'compare' ? 800 : 600,
-            }}
-          >
-            <GitCompare size={16} strokeWidth={2.2} />
-            <span>Compare Contracts</span>
-          </button>
-
-          <button
-            id="nav-tab-simplify"
-            onClick={() => setActiveTab('simplify')}
-            aria-selected={activeTab === 'simplify'}
-            role="tab"
-            className="btn"
-            style={{
-              padding: '0.55rem 1.15rem',
-              fontSize: '0.85rem',
-              borderRadius: '10px',
-              background: activeTab === 'simplify' ? '#ffffff' : 'transparent',
-              color: activeTab === 'simplify' ? 'var(--text-primary)' : 'var(--text-muted)',
-              boxShadow: activeTab === 'simplify' ? '0 3px 0 #ded8cd, 0 6px 14px rgba(0, 0, 0, 0.06)' : 'none',
-              border: activeTab === 'simplify' ? '1px solid var(--border-subtle)' : '1px solid transparent',
-              fontWeight: activeTab === 'simplify' ? 800 : 600,
-            }}
-          >
-            <BookOpen size={16} strokeWidth={2.2} />
-            <span>Plain English</span>
-          </button>
-
-          <button
-            id="nav-tab-qa"
-            onClick={() => setActiveTab('qa')}
-            aria-selected={activeTab === 'qa'}
-            role="tab"
-            className="btn"
-            style={{
-              padding: '0.55rem 1.15rem',
-              fontSize: '0.85rem',
-              borderRadius: '10px',
-              background: activeTab === 'qa' ? '#ffffff' : 'transparent',
-              color: activeTab === 'qa' ? 'var(--text-primary)' : 'var(--text-muted)',
-              boxShadow: activeTab === 'qa' ? '0 3px 0 #ded8cd, 0 6px 14px rgba(0, 0, 0, 0.06)' : 'none',
-              border: activeTab === 'qa' ? '1px solid var(--border-subtle)' : '1px solid transparent',
-              fontWeight: activeTab === 'qa' ? 800 : 600,
-            }}
-          >
-            <MessageSquareText size={16} strokeWidth={2.2} />
-            <span>Ask & Verify</span>
-          </button>
+          {TABS.map(tab => {
+            const isSelected = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                id={`nav-tab-${tab.id}`}
+                onClick={() => setActiveTab(tab.id)}
+                aria-selected={isSelected}
+                aria-controls={`tabpanel-${tab.id}`}
+                tabIndex={isSelected ? 0 : -1}
+                role="tab"
+                className="btn"
+                style={{
+                  padding: '0.55rem 1.15rem',
+                  fontSize: '0.85rem',
+                  borderRadius: '10px',
+                  background: isSelected ? '#ffffff' : 'transparent',
+                  color: isSelected ? 'var(--text-primary)' : 'var(--text-muted)',
+                  boxShadow: isSelected ? '0 3px 0 #ded8cd, 0 6px 14px rgba(0, 0, 0, 0.06)' : 'none',
+                  border: isSelected ? '1px solid var(--border-subtle)' : '1px solid transparent',
+                  fontWeight: isSelected ? 800 : 600,
+                }}
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
         </nav>
 
         {/* Right Hardware Badge & Theme Switch */}
