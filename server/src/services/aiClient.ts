@@ -99,8 +99,9 @@ class AIClientService {
           .trim();
 
         return JSON.parse(cleaned) as T;
-      } catch (err: any) {
-        console.warn(`[AIClient] Call to model '${model}' yielded error (${err?.status || err?.message}). Failing over...`);
+      } catch (err: unknown) {
+        const errorInfo = err && typeof err === 'object' && 'message' in err ? String(err.message) : String(err);
+        console.warn(`[AIClient] Call to model '${model}' yielded error (${errorInfo}). Failing over...`);
       }
     }
 

@@ -1,11 +1,18 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import compression from 'compression';
 import { config } from './config';
 import apiRouter from './routes/api';
 import { apiRateLimiter } from './middleware/security';
 
 const app = express();
+
+// Disable X-Powered-By Header for security
+app.disable('x-powered-by');
+
+// Enable Gzip/Brotli compression for all HTTP responses (high-efficiency bandwidth reduction)
+app.use(compression());
 
 // Security Headers via Helmet
 app.use(
@@ -70,11 +77,13 @@ app.use((_req: Request, res: Response) => {
 });
 
 // Global Error Handler
-app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
   console.error('[Unhandled Server Exception]:', err);
-  res.status(err.status || 500).json({
+  const status = (err && typeof err === 'object' && 'status' in err && typeof err.status === 'number') ? err.status : 500;
+  const message = err instanceof Error ? err.message : 'An unexpected error occurred during document processing.';
+  res.status(status).json({
     error: 'InternalServerError',
-    message: err.message || 'An unexpected error occurred during document processing.',
+    message,
   });
 });
 

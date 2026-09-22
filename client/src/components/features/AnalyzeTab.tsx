@@ -66,7 +66,7 @@ export const AnalyzeTab: React.FC<AnalyzeTabProps> = ({ samplePresets }) => {
       });
       setExpandedClauses(initialExpanded);
       setCompletedTasks({});
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (err instanceof ApiError) {
         setError(err.message);
       } else {

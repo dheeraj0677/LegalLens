@@ -47,7 +47,7 @@ export const SimplifyTab: React.FC = () => {
     try {
       const res = await apiService.simplifyText(text);
       setResult(res);
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (err instanceof ApiError) {
         setError(err.message);
       } else {

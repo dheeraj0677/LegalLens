@@ -77,12 +77,13 @@ router.post(
       cacheService.set(cacheKey, result);
       res.setHeader('X-Cache-Status', 'MISS');
       res.json(result);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('[Route /api/analyze Error]:', err);
+      const errMsg = err instanceof Error ? err.message : 'Unknown error';
       res.status(500).json({
         error: 'AnalysisError',
         message: 'Failed to complete legal document analysis. Please check your document text.',
-        details: process.env.NODE_ENV === 'development' ? err.message : undefined,
+        details: process.env.NODE_ENV === 'development' ? errMsg : undefined,
       });
     }
   }
@@ -111,12 +112,13 @@ router.post(
       cacheService.set(cacheKey, result);
       res.setHeader('X-Cache-Status', 'MISS');
       res.json(result);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('[Route /api/compare Error]:', err);
+      const errMsg = err instanceof Error ? err.message : 'Unknown error';
       res.status(500).json({
         error: 'ComparisonError',
         message: 'Failed to complete document comparison.',
-        details: process.env.NODE_ENV === 'development' ? err.message : undefined,
+        details: process.env.NODE_ENV === 'development' ? errMsg : undefined,
       });
     }
   }
@@ -145,12 +147,13 @@ router.post(
       cacheService.set(cacheKey, result);
       res.setHeader('X-Cache-Status', 'MISS');
       res.json(result);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('[Route /api/simplify Error]:', err);
+      const errMsg = err instanceof Error ? err.message : 'Unknown error';
       res.status(500).json({
         error: 'SimplificationError',
         message: 'Failed to simplify the provided legal text.',
-        details: process.env.NODE_ENV === 'development' ? err.message : undefined,
+        details: process.env.NODE_ENV === 'development' ? errMsg : undefined,
       });
     }
   }
@@ -179,12 +182,13 @@ router.post(
       cacheService.set(cacheKey, result);
       res.setHeader('X-Cache-Status', 'MISS');
       res.json(result);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('[Route /api/ask Error]:', err);
+      const errMsg = err instanceof Error ? err.message : 'Unknown error';
       res.status(500).json({
         error: 'QAError',
         message: 'Failed to answer inquiry based on the document.',
-        details: process.env.NODE_ENV === 'development' ? err.message : undefined,
+        details: process.env.NODE_ENV === 'development' ? errMsg : undefined,
       });
     }
   }

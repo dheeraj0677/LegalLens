@@ -40,7 +40,7 @@ export const QATab: React.FC<QATabProps> = ({ samplePresets }) => {
       const res = await apiService.askQuestion(docText, q);
       setChatHistory(prev => [res, ...prev]);
       setQuestion('');
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (err instanceof ApiError) {
         setError(err.message);
       } else {

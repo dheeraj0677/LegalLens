@@ -11,13 +11,13 @@ interface CacheEntry<T> {
  * Guarantees sub-5ms response retrieval for identical legal contract analyses and presets.
  */
 class CacheService {
-  private cache: Map<string, CacheEntry<any>> = new Map();
+  private cache: Map<string, CacheEntry<unknown>> = new Map();
   private maxEntries: number = 500;
   private defaultTtlMs: number = 10 * 60 * 1000; // 10 minutes
   private totalHits: number = 0;
   private totalMisses: number = 0;
 
-  public generateKey(namespace: string, ...inputs: any[]): string {
+  public generateKey(namespace: string, ...inputs: unknown[]): string {
     const serialized = JSON.stringify(inputs);
     const hash = crypto.createHash('sha256').update(serialized).digest('hex');
     return `${namespace}:${hash}`;

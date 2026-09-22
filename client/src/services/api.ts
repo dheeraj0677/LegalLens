@@ -10,9 +10,9 @@ const API_BASE = (import.meta.env.VITE_API_URL ? (import.meta.env.VITE_API_URL a
 
 export class ApiError extends Error {
   public status: number;
-  public details?: any;
+  public details?: unknown;
 
-  constructor(message: string, status: number = 500, details?: any) {
+  constructor(message: string, status: number = 500, details?: unknown) {
     super(message);
     this.name = 'ApiError';
     this.status = status;

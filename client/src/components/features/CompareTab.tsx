@@ -45,7 +45,7 @@ export const CompareTab: React.FC<CompareTabProps> = ({ samplePresets }) => {
     try {
       const res = await apiService.compareDocuments(valA, valB, nameA, nameB);
       setResult(res);
-    } catch (err: any) {
+    } catch (err: unknown) {
       if (err instanceof ApiError) {
         setError(err.message);
       } else {
