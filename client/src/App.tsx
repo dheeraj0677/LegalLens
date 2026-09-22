@@ -6,18 +6,18 @@ import { AriaLiveRegion } from './components/common/AriaLiveRegion';
 import { apiService } from './services/api';
 import { SampleDocumentPreset } from './types';
 
-// Lazy-loaded feature tab components for optimized code splitting
-const AnalyzeTab = lazy(() => import('./components/features/AnalyzeTab').then(m => ({ default: m.AnalyzeTab })));
-const CompareTab = lazy(() => import('./components/features/CompareTab').then(m => ({ default: m.CompareTab })));
-const SimplifyTab = lazy(() => import('./components/features/SimplifyTab').then(m => ({ default: m.SimplifyTab })));
-const QATab = lazy(() => import('./components/features/QATab').then(m => ({ default: m.QATab })));
+// Optimized code-split feature tabs
+const AnalyzeTab = lazy(() => import('./components/features/AnalyzeTab'));
+const CompareTab = lazy(() => import('./components/features/CompareTab'));
+const SimplifyTab = lazy(() => import('./components/features/SimplifyTab'));
+const QATab = lazy(() => import('./components/features/QATab'));
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'analyze' | 'compare' | 'simplify' | 'qa'>('analyze');
   const [theme, setTheme] = useState<'dark' | 'light'>('light');
   const [modelName, setModelName] = useState<string>('qwen/qwen3.8-27b:free');
   const [samplePresets, setSamplePresets] = useState<SampleDocumentPreset[]>([]);
-  const [ariaAnnouncement, setAriaAnnouncement] = useState<string>('Welcome to LegalLens. Workspace loaded.');
+  const [ariaAnnouncement, setAriaAnnouncement] = useState<string>('Welcome to LegalLens. Workspace ready.');
 
   // Initialize theme from localStorage or default to Italian Luxury White
   useEffect(() => {
@@ -40,10 +40,10 @@ export const App: React.FC = () => {
   const handleTabChange = (tab: 'analyze' | 'compare' | 'simplify' | 'qa') => {
     setActiveTab(tab);
     const labels: Record<string, string> = {
-      analyze: 'Switched to Analyze and Risk Intelligence tab.',
-      compare: 'Switched to Bilateral Contract Comparison tab.',
-      simplify: 'Switched to Plain English Simplifier tab.',
-      qa: 'Switched to Grounded Document Q and A tab.',
+      analyze: 'Active: Analyze and Risk Intelligence panel.',
+      compare: 'Active: Bilateral Contract Comparison panel.',
+      simplify: 'Active: Plain English Simplifier panel.',
+      qa: 'Active: Grounded Document Q and A panel.',
     };
     setAriaAnnouncement(labels[tab] || 'Tab switched.');
   };
@@ -88,7 +88,7 @@ export const App: React.FC = () => {
           modelName={modelName}
         />
 
-        {/* Main Content Landmark */}
+        {/* Main Content Landmark with Accessible Tabpanels */}
         <main id="main-content" className="container" style={{ flex: 1 }}>
           <Suspense
             fallback={
@@ -121,10 +121,45 @@ export const App: React.FC = () => {
               </div>
             }
           >
-            {activeTab === 'analyze' && <AnalyzeTab samplePresets={samplePresets} />}
-            {activeTab === 'compare' && <CompareTab samplePresets={samplePresets} />}
-            {activeTab === 'simplify' && <SimplifyTab />}
-            {activeTab === 'qa' && <QATab samplePresets={samplePresets} />}
+            <div
+              id="tabpanel-analyze"
+              role="tabpanel"
+              aria-labelledby="nav-tab-analyze"
+              tabIndex={0}
+              hidden={activeTab !== 'analyze'}
+            >
+              {activeTab === 'analyze' && <AnalyzeTab samplePresets={samplePresets} />}
+            </div>
+
+            <div
+              id="tabpanel-compare"
+              role="tabpanel"
+              aria-labelledby="nav-tab-compare"
+              tabIndex={0}
+              hidden={activeTab !== 'compare'}
+            >
+              {activeTab === 'compare' && <CompareTab samplePresets={samplePresets} />}
+            </div>
+
+            <div
+              id="tabpanel-simplify"
+              role="tabpanel"
+              aria-labelledby="nav-tab-simplify"
+              tabIndex={0}
+              hidden={activeTab !== 'simplify'}
+            >
+              {activeTab === 'simplify' && <SimplifyTab />}
+            </div>
+
+            <div
+              id="tabpanel-qa"
+              role="tabpanel"
+              aria-labelledby="nav-tab-qa"
+              tabIndex={0}
+              hidden={activeTab !== 'qa'}
+            >
+              {activeTab === 'qa' && <QATab samplePresets={samplePresets} />}
+            </div>
           </Suspense>
         </main>
 

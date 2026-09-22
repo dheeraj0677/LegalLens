@@ -408,3 +408,5 @@ export const SimplifyTab: React.FC = () => {
     </div>
   );
 };
+
+export default SimplifyTab;

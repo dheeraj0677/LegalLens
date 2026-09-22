@@ -550,3 +550,5 @@ export const CompareTab: React.FC<CompareTabProps> = ({ samplePresets }) => {
     </div>
   );
 };
+
+export default CompareTab;

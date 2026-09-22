@@ -770,3 +770,5 @@ export const AnalyzeTab: React.FC<AnalyzeTabProps> = ({ samplePresets }) => {
     </div>
   );
 };
+
+export default AnalyzeTab;

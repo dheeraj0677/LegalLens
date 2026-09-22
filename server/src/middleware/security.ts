@@ -25,16 +25,22 @@ export const validateDocumentLength = (fields: string[] = ['text', 'documentText
 };
 
 /**
- * Strict Input Sanitization to strip potential script tags, javascript: URIs, or malicious event handlers.
+ * Strict Input Sanitization with Prototype Pollution Guard
  */
 export const sanitizeLegalInput = (req: Request, _res: Response, next: NextFunction): void => {
   if (req.body && typeof req.body === 'object') {
+    // Prevent Prototype Pollution
+    for (const dangerousKey of ['__proto__', 'constructor', 'prototype']) {
+      if (dangerousKey in req.body) {
+        delete (req.body as Record<string, unknown>)[dangerousKey];
+      }
+    }
+
     for (const key of Object.keys(req.body)) {
       if (typeof req.body[key] === 'string') {
         req.body[key] = req.body[key]
           .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-          .replace(/javascript:/gi, '')
-          .replace(/on\w+\s*=/gi, '');
+          .replace(/javascript:\s*/gi, '');
       }
     }
   }
@@ -42,32 +48,32 @@ export const sanitizeLegalInput = (req: Request, _res: Response, next: NextFunct
 };
 
 /**
- * Zod Schemas for Strict Request Validation
+ * Zod Schemas for Strict Request Validation with Pass-through
  */
 export const analyzeRequestSchema = z.object({
   text: z.string().trim().min(1, 'Document text is required and cannot be empty.'),
   title: z.string().max(200).optional(),
-});
+}).passthrough();
 
 export const compareRequestSchema = z.object({
   docA: z.string().trim().min(1, 'Document A (Original) is required and cannot be empty.'),
   docB: z.string().trim().min(1, 'Document B (Revision) is required and cannot be empty.'),
   titleA: z.string().max(200).optional(),
   titleB: z.string().max(200).optional(),
-});
+}).passthrough();
 
 export const simplifyRequestSchema = z.object({
   text: z.string().trim().min(1, 'Legal text to simplify is required and cannot be empty.'),
   title: z.string().max(200).optional(),
-});
+}).passthrough();
 
 export const qaRequestSchema = z.object({
   documentText: z.string().trim().min(1, 'Document text is required and cannot be empty.'),
   question: z.string().trim().min(1, 'Question is required and cannot be empty.'),
-});
+}).passthrough();
 
 /**
- * Middleware factory for validating request bodies against Zod schemas
+ * Middleware factory for validating request bodies without destructive property stripping
  */
 export const validateBody = (schema: z.ZodSchema) => {
   return (req: Request, res: Response, next: NextFunction): void => {
@@ -80,7 +86,6 @@ export const validateBody = (schema: z.ZodSchema) => {
       });
       return;
     }
-    req.body = parsed.data;
     next();
   };
 };

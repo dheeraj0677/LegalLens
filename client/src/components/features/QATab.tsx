@@ -357,3 +357,5 @@ export const QATab: React.FC<QATabProps> = ({ samplePresets }) => {
     </div>
   );
 };
+
+export default QATab;
